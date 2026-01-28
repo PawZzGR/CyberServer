@@ -143,3 +143,68 @@
 2026-01-05 16:48:09,667 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
 2026-01-05 16:48:44,680 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
 2026-01-05 16:49:19,689 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:22:50,887 - INFO - Starting UserClient...
+2026-01-28 16:22:50,888 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-28 16:22:57,186 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:23:02,130 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-28 16:23:07,136 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-28 16:23:07,198 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:23:22,204 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:23:47,217 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:24:22,222 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:24:57,233 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:25:32,238 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:26:07,249 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:26:42,258 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:27:17,264 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:27:52,268 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:28:27,278 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:29:02,292 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:29:37,298 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:30:12,314 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:30:47,330 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:31:22,339 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:31:57,345 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:32:32,349 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:33:07,359 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:33:42,361 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:34:17,362 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:34:52,365 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:35:27,366 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:36:02,377 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:36:37,391 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:37:12,404 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:37:47,418 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:38:22,420 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:38:57,423 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:39:32,434 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:40:07,447 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:40:42,453 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:41:17,467 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:41:52,480 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:42:27,489 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:43:02,496 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:43:37,508 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:44:12,516 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:44:47,520 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:45:22,523 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:45:57,538 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:46:32,544 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:47:07,549 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:47:42,560 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:48:17,561 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:48:52,575 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:49:27,580 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:52:57,019 - INFO - Starting UserClient...
+2026-01-28 16:52:57,020 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-28 16:53:02,300 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:53:02,749 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-28 16:53:07,275 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-28 16:53:07,761 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-28 16:53:12,282 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-28 16:53:12,314 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-28 16:53:24,350 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-01-28 16:53:31,220 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-28 16:53:36,230 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-28 16:57:04,779 - INFO - Starting reboot countdown (60 seconds)
+2026-01-28 16:58:04,836 - INFO - Reboot countdown expired - rebooting PC

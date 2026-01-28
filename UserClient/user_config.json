@@ -1,9 +1,10 @@
 {
     "client_machine": "Unknown",
-    "server_address": "192.168.1.6",
+    "server_address": "192.168.1.127",
     "server_port": 5000,
     "admin_address": "192.168.1.10",
     "admin_port": 5001,
     "sync_interval": 3600,
-    "game_sync_interval": 30
+    "game_sync_interval": 30,
+    "settings_password_hash": "281969"
 }

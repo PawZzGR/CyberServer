@@ -117,6 +117,7 @@ VK_LWIN = 0x5B
 VK_RWIN = 0x5C
 VK_ESCAPE = 0x1B
 VK_CONTROL = 0x11
+VK_MENU = 0x12  # Alt key
 keyboard_block_enabled = True
 keyboard_hook_id = None
 
@@ -128,9 +129,18 @@ def low_level_keyboard_proc(nCode, wParam, lParam):
         kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
         vk = kb.vkCode
         ctrl_down = bool(user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
-        if vk == VK_TAB: return 1
+        alt_down = bool(user32.GetAsyncKeyState(VK_MENU) & 0x8000)
+        
+        # Block Alt+Tab and Alt+Esc (task switcher)
+        if alt_down and vk == VK_TAB: return 1
+        if alt_down and vk == VK_ESCAPE: return 1
+        
+        # Block Windows keys
         if vk in (VK_LWIN, VK_RWIN): return 1
+        
+        # Block Ctrl+Esc (Start menu)
         if ctrl_down and vk == VK_ESCAPE: return 1
+        
     return user32.CallNextHookEx(keyboard_hook_id, nCode, wParam, lParam)
 
 LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, wintypes.INT, wintypes.WPARAM, wintypes.LPARAM)
@@ -368,6 +378,10 @@ class ClientApp:
         self.remaining_seconds = 0
         self.timer_running = False
         
+        # Reboot countdown after session ends
+        self.session_ended_naturally = False  # True only when time runs out
+        self.reboot_countdown_active = False  # True when countdown is running
+        self.reboot_countdown_seconds = 0     # Remaining seconds to reboot
         self.base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
         # Game Sync settings
@@ -463,7 +477,10 @@ class ClientApp:
                             font=("Segoe UI", 12, "bold"), bd=0, padx=10, pady=10, activebackground=self.ACCENT, cursor="hand2")
         login_btn.pack(fill="x")
         
-        # Start connection checker
+        # Reboot countdown label (shown only when countdown is active, no X button)
+        self.reboot_label = tk.Label(card, text="", font=("Segoe UI", 11, "bold"), 
+                                      bg=self.BG_CARD, fg="#e74c3c")
+        self.reboot_label.pack(pady=(10, 0))
         self.check_conn_running = True
         threading.Thread(target=self.connection_checker, daemon=True).start()
         
@@ -491,6 +508,10 @@ class ClientApp:
 
     def handle_login(self, resp, u, p):
         if resp.get("status") == "ok":
+            # Cancel any active reboot countdown
+            self.reboot_countdown_active = False
+            self.session_ended_naturally = False
+            
             self.username = u
             self.password = p
             self.remaining_seconds = resp.get("remaining_seconds", 0)
@@ -532,6 +553,7 @@ class ClientApp:
                 self.remaining_seconds -= 1
                 if self.remaining_seconds % 5 == 0: self.send_update()
             self.timer_running = False
+            self.session_ended_naturally = True  # Mark that session ended due to time
             self.send_update()
             # Restore full lock screen
             self.root.after(0, self.restore_lock_screen)
@@ -547,6 +569,52 @@ class ClientApp:
         self.root.focus_force()
         self.root.lift()
         self.build_login_ui()
+        
+        # Start reboot countdown only if session ended due to time running out
+        if self.session_ended_naturally:
+            self.start_reboot_countdown()
+    
+    def start_reboot_countdown(self):
+        """Start 60-second countdown to reboot. Only cancelled by successful login."""
+        self.reboot_countdown_active = True
+        self.reboot_countdown_seconds = 60
+        logging.info("Starting reboot countdown (60 seconds)")
+        
+        def countdown():
+            while self.reboot_countdown_seconds > 0:
+                # Cancel if user logged in (timer_running becomes True)
+                if self.timer_running or not self.reboot_countdown_active:
+                    self.reboot_countdown_active = False
+                    self.session_ended_naturally = False  # Reset for next session
+                    logging.info("Reboot countdown cancelled - user logged in")
+                    # Clear the label
+                    self.root.after(0, lambda: self.update_reboot_label(0))
+                    return
+                
+                # Update UI with countdown (no X button, just display)
+                self.root.after(0, lambda s=self.reboot_countdown_seconds: 
+                    self.update_reboot_label(s))
+                
+                time.sleep(1)
+                self.reboot_countdown_seconds -= 1
+            
+            # 60 seconds passed, no login - REBOOT!
+            if not self.timer_running and self.reboot_countdown_active:
+                logging.info("Reboot countdown expired - rebooting PC")
+                os.system("shutdown /r /t 0")
+        
+        threading.Thread(target=countdown, daemon=True).start()
+    
+    def update_reboot_label(self, seconds):
+        """Update the reboot countdown display on login screen."""
+        try:
+            if hasattr(self, 'reboot_label') and self.reboot_label.winfo_exists():
+                if seconds > 0:
+                    self.reboot_label.config(text=f"⚠️ Επανεκκίνηση σε {seconds} δευτ...")
+                else:
+                    self.reboot_label.config(text="")
+        except tk.TclError:
+            pass  # Widget destroyed
 
     def send_update(self):
         try:
