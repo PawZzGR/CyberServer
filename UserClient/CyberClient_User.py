@@ -143,6 +143,7 @@ VK_LWIN = 0x5B
 VK_RWIN = 0x5C
 VK_ESCAPE = 0x1B
 VK_CONTROL = 0x11
+VK_MENU = 0x12  # Alt key
 keyboard_block_enabled = True
 keyboard_hook_id = None
 
@@ -154,9 +155,20 @@ def low_level_keyboard_proc(nCode, wParam, lParam):
         kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
         vk = kb.vkCode
         ctrl_down = bool(user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
-        if vk == VK_TAB: return 1
+        alt_down = bool(user32.GetAsyncKeyState(VK_MENU) & 0x8000)
+        
+        # Block Alt+Tab and Alt+Esc (task switcher)
+        if alt_down and vk == VK_TAB: return 1
+        if alt_down and vk == VK_ESCAPE: return 1
+        
+        # Block Windows keys
         if vk in (VK_LWIN, VK_RWIN): return 1
+        
+        # Block Ctrl+Esc (Start menu)
         if ctrl_down and vk == VK_ESCAPE: return 1
+        
+        # Block Ctrl+Alt+Delete cannot be blocked by software (Windows security)
+        
     return user32.CallNextHookEx(keyboard_hook_id, nCode, wParam, lParam)
 
 LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, wintypes.INT, wintypes.WPARAM, wintypes.LPARAM)
