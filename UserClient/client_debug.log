@@ -1,0 +1,145 @@
+2025-12-30 13:32:04,933 - INFO - Starting UserClient...
+2025-12-30 13:32:04,935 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=:5001, STATION=Unknown
+2025-12-30 13:32:10,616 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2025-12-30 13:32:20,566 - WARNING - [GAME SYNC] No source available
+2025-12-30 13:32:20,627 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2025-12-30 13:32:35,638 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2025-12-30 13:33:00,646 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-02 14:15:04,822 - INFO - Starting UserClient...
+2026-01-02 14:15:04,863 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=:5001, STATION=Unknown
+2026-01-02 14:15:10,181 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-02 14:15:20,142 - WARNING - [GAME SYNC] No source available
+2026-01-02 14:15:20,188 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-02 14:15:35,192 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-02 14:16:00,206 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:14:04,109 - INFO - Starting UserClient...
+2026-01-05 15:14:04,125 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=:5001, STATION=Unknown
+2026-01-05 15:14:10,579 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:14:20,530 - WARNING - [GAME SYNC] No source available
+2026-01-05 15:14:20,593 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:14:32,742 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:14:35,598 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:14:54,083 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:15:00,601 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:15:33,688 - INFO - Starting UserClient...
+2026-01-05 15:15:33,703 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 15:15:38,989 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:15:39,832 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:15:43,961 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:15:48,892 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:15:48,990 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:16:04,001 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:16:29,013 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:20:14,365 - INFO - Starting UserClient...
+2026-01-05 15:20:14,365 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 15:20:19,686 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:20:19,810 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:20:24,664 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:20:24,665 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:20:24,690 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 15:20:24,691 - WARNING - Error scanning  on Admin: HTTP Error 404: File not found
+2026-01-05 15:20:24,692 - INFO - [GAME SYNC] Found 0 total files across all folders
+2026-01-05 15:20:28,132 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:20:28,132 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:20:28,134 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 15:20:28,150 - WARNING - Error scanning  on Admin: HTTP Error 404: File not found
+2026-01-05 15:20:28,150 - INFO - [GAME SYNC] Found 0 total files across all folders
+2026-01-05 15:20:29,692 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:20:44,705 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:21:09,714 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:25:38,479 - INFO - Starting UserClient...
+2026-01-05 15:25:38,480 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 15:25:43,749 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:25:44,925 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:25:48,728 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:25:48,729 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:25:48,733 - WARNING - [GAME SYNC] Admin has no folders configured
+2026-01-05 15:25:53,764 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:26:08,778 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:26:33,791 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:26:37,132 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:26:46,596 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:26:46,596 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:26:46,598 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 15:26:47,249 - INFO - [GAME SYNC] Found 623 total files across all folders
+2026-01-05 15:27:08,804 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:27:43,810 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:30:46,853 - INFO - Starting UserClient...
+2026-01-05 15:30:46,854 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 15:30:51,554 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 15:30:52,146 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:30:57,136 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:30:57,136 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:30:57,156 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 15:30:57,948 - INFO - [GAME SYNC] Found 623 total files across all folders
+2026-01-05 15:30:59,300 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 15:30:59,300 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 15:30:59,727 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 15:31:02,155 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:31:17,169 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:31:20,354 - INFO - [GAME SYNC] Found 623 total files across all folders
+2026-01-05 15:31:42,183 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 15:32:17,191 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:07:43,138 - INFO - Starting UserClient...
+2026-01-05 16:07:43,139 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 16:07:48,448 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:07:53,420 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 16:07:53,421 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 16:07:53,423 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 16:07:54,477 - INFO - [GAME SYNC] Found 623 total files across all folders
+2026-01-05 16:07:58,457 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:07:59,903 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 16:08:10,990 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-01-05 16:09:14,813 - INFO - Starting UserClient...
+2026-01-05 16:09:14,814 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 16:09:17,783 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-01-05 16:09:19,412 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 16:09:25,061 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 16:09:25,061 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 16:09:25,084 - INFO - [GAME SYNC] Admin has 1 folders: ['C:\\Program Files (x86)\\Epic Games\\Fortnite']
+2026-01-05 16:09:25,962 - INFO - [GAME SYNC] Found 623 total files across all folders
+2026-01-05 16:09:27,797 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:22:08,681 - INFO - Starting UserClient...
+2026-01-05 16:22:08,682 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 16:22:12,707 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 16:22:14,026 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:22:17,711 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-05 16:22:19,004 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 16:22:19,004 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 16:22:24,028 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:22:29,018 - ERROR - URLError getting index from Admin: <urlopen error timed out>
+2026-01-05 16:22:39,034 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:23:04,039 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:23:39,043 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:28:47,688 - INFO - Starting UserClient...
+2026-01-05 16:28:47,688 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 16:28:52,449 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-05 16:28:52,999 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:28:57,463 - ERROR - Error fetching games: timed out
+2026-01-05 16:28:57,972 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 16:28:57,974 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 16:29:03,012 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:39:39,196 - INFO - Starting UserClient...
+2026-01-05 16:39:39,197 - INFO - Loaded config: SERVER=192.168.1.6:5000, ADMIN=192.168.1.10:5001, STATION=Unknown
+2026-01-05 16:39:44,511 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:39:49,484 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-05 16:39:49,485 - INFO - [GAME SYNC] Getting folders from http://192.168.1.10:5001/folders
+2026-01-05 16:39:54,520 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:39:59,487 - ERROR - URLError getting index from Admin: <urlopen error timed out>
+2026-01-05 16:40:09,528 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:40:34,533 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:41:09,538 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:41:44,555 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:42:19,562 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:42:54,578 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:43:29,594 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:44:04,610 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:44:39,625 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:45:14,634 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:45:49,641 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:46:24,645 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:46:59,652 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:47:34,658 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:48:09,667 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:48:44,680 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:49:19,689 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>

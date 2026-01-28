@@ -1,0 +1,13 @@
+2026-01-05 16:49:43,436 - INFO - Starting AdminClient...
+2026-01-05 16:49:43,445 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
+2026-01-05 16:49:45,724 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:49:52,730 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:49:59,744 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:06,749 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:13,763 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:20,770 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:27,774 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:34,790 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:41,806 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:48,819 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-05 16:50:55,826 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
