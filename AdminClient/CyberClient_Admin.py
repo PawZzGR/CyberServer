@@ -49,9 +49,9 @@ else:
     # Running as Python script
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-CONFIG_FILE = os.path.join(_BASE_DIR, "admin_config.json")
-MAPPINGS_FILE = os.path.join(_BASE_DIR, "client_admin_mappings.json")
-SYNC_FOLDERS_FILE = os.path.join(_BASE_DIR, "sync_folders.json")
+CONFIG_FILE = "admin_config.json"
+MAPPINGS_FILE = "client_admin_mappings.json"
+SYNC_FOLDERS_FILE = "sync_folders.json"
 
 # Default values
 SERVER_HOST = "192.168.1.6"
@@ -60,6 +60,42 @@ STATION_NAME = "Unknown"
 FILE_SERVER_PORT = 5001
 SCAN_INTERVAL = 60  # Minutes
 SETTINGS_PASSWORD_HASH = None
+
+def get_app_data_dir():
+    """Get the persistent AppData directory for settings."""
+    app_data = os.getenv('APPDATA')
+    if not app_data:
+        app_data = os.path.expanduser("~")
+    
+    path = os.path.join(app_data, "CyberClient", "Admin")
+    try:
+        os.makedirs(path, exist_ok=True)
+    except Exception as e:
+        print(f"Failed to create AppData dir: {e}")
+        return _BASE_DIR # Fallback to local
+    return path
+
+def get_config_path():
+    return os.path.join(get_app_data_dir(), CONFIG_FILE)
+
+def get_sync_folders_path():
+    return os.path.join(get_app_data_dir(), SYNC_FOLDERS_FILE)
+
+def save_json_atomic(filepath, data):
+    """Save JSON to file atomically to prevent corruption on crash/reboot."""
+    tmp_path = filepath + ".tmp"
+    try:
+        with open(tmp_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+            f.flush()
+            os.fsync(f.fileno()) # Ensure write to disk
+        
+        # Atomic replace
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        os.rename(tmp_path, filepath)
+    except Exception as e:
+        logging.error(f"Failed to save atomic {filepath}: {e}")
 
 def get_local_ip():
     """Get the local IP address of this machine."""
@@ -75,8 +111,22 @@ def get_local_ip():
 
 def load_config():
     global SERVER_HOST, SERVER_PORT, STATION_NAME, SYNC_INTERVAL, FILE_SERVER_PORT, SCAN_INTERVAL, SETTINGS_PASSWORD_HASH
+    
+    # Try AppData first
+    cfg_path = get_config_path()
+    
+    # Migration: Check local first
+    local_config = os.path.join(_BASE_DIR, "admin_config.json")
+    if not os.path.exists(cfg_path) and os.path.exists(local_config):
+        logging.info("Migrating Admin config to AppData...")
+        try:
+            with open(local_config, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            save_json_atomic(cfg_path, data)
+        except: pass
+
     try:
-        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+        with open(cfg_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
             SERVER_HOST = config.get("server_address", "192.168.1.5")
             SERVER_PORT = config.get("server_port", 5000)
@@ -346,18 +396,26 @@ def scan_folder(folder_path):
     return files
 
 def load_sync_folders():
-    """Load sync folders from local config file."""
+    """Load sync folders from persistent config."""
+    path = get_sync_folders_path()
+    
+    # Migration
+    local_path = os.path.join(_BASE_DIR, "sync_folders.json")
+    if not os.path.exists(path) and os.path.exists(local_path):
+        try:
+            with open(local_path, 'r') as f: save_json_atomic(path, json.load(f))
+        except: pass
+        
     try:
-        with open(SYNC_FOLDERS_FILE, 'r') as f:
+        with open(path, 'r') as f:
             return json.load(f)
     except:
         return []
 
 def save_sync_folders(folders):
-    """Save sync folders to local config file."""
+    """Save sync folders to persistent config."""
     try:
-        with open(SYNC_FOLDERS_FILE, 'w') as f:
-            json.dump(folders, f)
+        save_json_atomic(get_sync_folders_path(), folders)
     except:
         pass
 
@@ -672,8 +730,7 @@ class ClientApp:
                         "sync_interval": SYNC_INTERVAL,
                         "settings_password_hash": SETTINGS_PASSWORD_HASH
                     }
-                    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(new_conf, f, indent=4)
+                    save_json_atomic(get_config_path(), new_conf)
                     
                     messagebox.showinfo("Setup", "Password set! opening settings...", parent=self.root)
                     self.open_settings_ui()
@@ -817,8 +874,7 @@ class ClientApp:
                 "scan_interval": SCAN_INTERVAL,
                 "settings_password_hash": SETTINGS_PASSWORD_HASH
             }
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(new_conf, f, indent=4)
+            save_json_atomic(get_config_path(), new_conf)
             
             messagebox.showinfo("Saved", "Settings saved!", parent=win)
         except Exception as e:

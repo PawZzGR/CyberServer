@@ -51,8 +51,8 @@ else:
     # Running as Python script
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-CONFIG_FILE = os.path.join(_BASE_DIR, "user_config.json")
-GAME_MAPPINGS_FILE = os.path.join(_BASE_DIR, "game_mappings.json")
+CONFIG_FILE = "user_config.json" # Filename only, path determined runtime
+GAME_MAPPINGS_FILE = "game_mappings.json"
 
 # Default values
 SERVER_HOST = "192.168.1.6"
@@ -63,6 +63,42 @@ STATION_NAME = "Unknown"
 SYNC_INTERVAL = 10800  # Seconds (3 hours default)
 GAME_SYNC_INTERVAL = 30  # Minutes
 DOWNLOAD_FOLDER = os.path.join(_BASE_DIR, "Games")
+
+def get_app_data_dir():
+    """Get the persistent AppData directory for settings."""
+    app_data = os.getenv('APPDATA')
+    if not app_data:
+        app_data = os.path.expanduser("~")
+    
+    path = os.path.join(app_data, "CyberClient", "User")
+    try:
+        os.makedirs(path, exist_ok=True)
+    except Exception as e:
+        print(f"Failed to create AppData dir: {e}")
+        return _BASE_DIR # Fallback to local
+    return path
+
+def get_config_path():
+    return os.path.join(get_app_data_dir(), CONFIG_FILE)
+
+def get_mappings_path():
+    return os.path.join(get_app_data_dir(), GAME_MAPPINGS_FILE)
+
+def save_json_atomic(filepath, data):
+    """Save JSON to file atomically to prevent corruption on crash/reboot."""
+    tmp_path = filepath + ".tmp"
+    try:
+        with open(tmp_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+            f.flush()
+            os.fsync(f.fileno()) # Ensure write to disk
+        
+        # Atomic replace
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        os.rename(tmp_path, filepath)
+    except Exception as e:
+        logging.error(f"Failed to save atomic {filepath}: {e}")
 
 # Named constants for timing (Issue #11 - avoid magic numbers)
 MESSAGE_PUMP_INTERVAL = 0.01  # Seconds - keyboard hook message pump
@@ -98,8 +134,24 @@ def normalize_path(path):
 
 def load_config():
     global SERVER_HOST, SERVER_PORT, ADMIN_HOST, ADMIN_PORT, STATION_NAME, SYNC_INTERVAL, GAME_SYNC_INTERVAL, DOWNLOAD_FOLDER, SETTINGS_PASSWORD_HASH
+    
+    # Try AppData first
+    cfg_path = get_config_path()
+    
+    # Migration: If AppData config doesn't exist but local does, use local
+    local_config = os.path.join(_BASE_DIR, "user_config.json")
+    if not os.path.exists(cfg_path) and os.path.exists(local_config):
+        logging.info("Migrating config from Local to AppData...")
+        try:
+            with open(local_config, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            save_json_atomic(cfg_path, data) # Save to AppData
+        except Exception as e:
+             logging.error(f"Migration failed: {e}")
+             cfg_path = local_config # Fallback to read from local
+             
     try:
-        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+        with open(cfg_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
             SERVER_HOST = config.get("server_address", "192.168.1.5")
             SERVER_PORT = config.get("server_port", 5000)
@@ -111,7 +163,7 @@ def load_config():
             DOWNLOAD_FOLDER = config.get("download_folder", os.path.join(_BASE_DIR, "Games"))
             SETTINGS_PASSWORD_HASH = config.get("settings_password_hash", None)
             
-            logging.info(f"Loaded config: SERVER={SERVER_HOST}:{SERVER_PORT}, ADMIN={ADMIN_HOST}:{ADMIN_PORT}, STATION={STATION_NAME}")
+            logging.info(f"Loaded config from {cfg_path}")
     except Exception as e:
         logging.error(f"Failed to load config: {e}")
         SYNC_INTERVAL = 10800
@@ -397,23 +449,32 @@ class ClientApp:
         for w in self.root.winfo_children(): w.destroy()
     
     def load_game_mappings(self):
-        """Load per-game destination mappings from config file."""
+        """Load per-game destination mappings from persistent config."""
+        map_path = get_mappings_path()
+        
+        # Migration: Check local file first if AppData missing
+        local_map = "game_mappings.json"
+        if not os.path.exists(map_path) and os.path.exists(local_map):
+            try:
+                with open(local_map, 'r') as f:
+                    data = json.load(f)
+                save_json_atomic(map_path, data)
+            except: pass
+            
         try:
-            with open(GAME_MAPPINGS_FILE, 'r') as f:
+            with open(map_path, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            logging.debug(f"Game mappings file not found: {GAME_MAPPINGS_FILE}")
             return {}
         except json.JSONDecodeError as e:
-            logging.warning(f"Invalid JSON in game mappings file: {e}")
+            logging.warning(f"Invalid JSON in game mappings: {e}")
             return {}
     
     def save_game_mappings(self):
-        """Save per-game destination mappings to config file."""
+        """Save per-game destination mappings to persistent config."""
         try:
-            with open(GAME_MAPPINGS_FILE, 'w') as f:
-                json.dump(self.game_mappings, f, indent=2)
-        except OSError as e:
+            save_json_atomic(get_mappings_path(), self.game_mappings)
+        except Exception as e:
             logging.error(f"Failed to save game mappings: {e}")
 
     # --- UI ---
@@ -682,20 +743,20 @@ class ClientApp:
             messagebox.showerror("Error", "Wrong password")
     
     def _save_password_hash(self):
-        """Save the password hash to config file."""
+        """Save the password hash to config file atomically."""
         try:
-            # Load existing config
-            try:
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-            except (FileNotFoundError, json.JSONDecodeError):
-                config = {}
+            # Load existing config to preserve other settings
+            cfg_path = get_config_path()
+            config = {}
+            if os.path.exists(cfg_path):
+                try:
+                    with open(cfg_path, 'r', encoding='utf-8') as f:
+                        config = json.load(f)
+                except: pass
             
             config["settings_password_hash"] = SETTINGS_PASSWORD_HASH
-            
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=4)
-        except OSError as e:
+            save_json_atomic(cfg_path, config)
+        except Exception as e:
             logging.error(f"Failed to save password hash: {e}")
 
     def open_settings_ui(self):
@@ -1012,8 +1073,7 @@ class ClientApp:
                 "game_sync_interval": GAME_SYNC_INTERVAL,
                 "settings_password_hash": SETTINGS_PASSWORD_HASH  # Preserve password hash
             }
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(new_conf, f, indent=4)
+            save_json_atomic(get_config_path(), new_conf)
             
             messagebox.showinfo("Saved", "Settings and game mappings saved!", parent=win)
         except Exception as e:
