@@ -208,3 +208,55 @@
 2026-01-28 16:53:36,230 - ERROR - URLError fetching games: <urlopen error timed out>
 2026-01-28 16:57:04,779 - INFO - Starting reboot countdown (60 seconds)
 2026-01-28 16:58:04,836 - INFO - Reboot countdown expired - rebooting PC
+2026-01-29 12:46:59,718 - INFO - Starting UserClient...
+2026-01-29 12:46:59,719 - INFO - Migrating config from Local to AppData...
+2026-01-29 12:46:59,723 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 12:47:05,900 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:47:33,320 - INFO - Starting UserClient...
+2026-01-29 12:47:33,321 - INFO - Migrating config from Local to AppData...
+2026-01-29 12:47:33,330 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 12:47:38,625 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:47:40,775 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 12:47:43,592 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 12:47:45,782 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 12:47:46,324 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 12:47:48,597 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 12:47:48,629 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:47:51,328 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 12:51:21,167 - INFO - Starting UserClient...
+2026-01-29 12:51:21,169 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 12:51:26,513 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:51:31,483 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 12:51:34,417 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 12:51:36,487 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 12:51:36,518 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:51:39,430 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 12:51:51,533 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:52:08,099 - INFO - Starting UserClient...
+2026-01-29 12:52:08,100 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 12:52:13,379 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 12:52:18,360 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:05:27,145 - INFO - Starting UserClient...
+2026-01-29 13:05:27,146 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 13:05:31,683 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:05:32,434 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:05:36,690 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:05:37,408 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:05:42,414 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:05:42,445 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:05:51,118 - INFO - Starting UserClient...
+2026-01-29 13:05:51,138 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 13:05:55,047 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:05:56,420 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:06:00,060 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:06:01,413 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:06:06,423 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:06:06,423 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:06:59,852 - INFO - Starting UserClient...
+2026-01-29 13:06:59,854 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 13:07:04,659 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:07:05,139 - WARNING - Connection failed to http://192.168.1.127:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:07:09,662 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:07:10,132 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:07:15,142 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:07:15,143 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>

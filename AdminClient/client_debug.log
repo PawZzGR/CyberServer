@@ -11,3 +11,23 @@
 2026-01-05 16:50:41,806 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
 2026-01-05 16:50:48,819 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
 2026-01-05 16:50:55,826 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:11:48,385 - INFO - Starting AdminClient...
+2026-01-29 13:11:48,463 - INFO - Migrating Admin config to AppData...
+2026-01-29 13:11:48,466 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
+2026-01-29 13:11:48,745 - INFO - File server started on port 5001
+2026-01-29 13:11:50,743 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:11:57,745 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:13:53,704 - INFO - Starting AdminClient...
+2026-01-29 13:13:53,711 - INFO - Migrating Admin config to AppData...
+2026-01-29 13:13:53,719 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
+2026-01-29 13:13:53,928 - INFO - File server started on port 5001
+2026-01-29 13:13:55,930 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:14:30,413 - INFO - Starting AdminClient...
+2026-01-29 13:14:30,419 - ERROR - Failed to load config: [Errno 2] No such file or directory: 'C:\\Users\\Kesid\\AppData\\Roaming\\CyberClient\\Admin\\admin_config.json'
+2026-01-29 13:14:30,630 - INFO - File server started on port 5001
+2026-01-29 13:14:32,640 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:14:39,648 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:14:49,791 - INFO - Starting AdminClient...
+2026-01-29 13:14:49,817 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
+2026-01-29 13:14:50,065 - INFO - File server started on port 5001
+2026-01-29 13:14:52,063 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>

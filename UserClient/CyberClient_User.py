@@ -63,6 +63,7 @@ STATION_NAME = "Unknown"
 SYNC_INTERVAL = 10800  # Seconds (3 hours default)
 GAME_SYNC_INTERVAL = 30  # Minutes
 DOWNLOAD_FOLDER = os.path.join(_BASE_DIR, "Games")
+SETTINGS_PASSWORD_HASH = None  # Will be set on first use or loaded from config
 
 def get_app_data_dir():
     """Get the persistent AppData directory for settings."""
@@ -180,9 +181,6 @@ PATHS_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/game_paths"
 GET_SOURCE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/source"
 GET_INDEX_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/index"
 GET_FOLDERS_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/folders"
-
-# Settings password - stored as hash for security
-SETTINGS_PASSWORD_HASH = None  # Will be set on first use or loaded from config
 
 # -------- WINDOWS KEYBLOCK --------
 user32 = ctypes.windll.user32
@@ -995,6 +993,13 @@ class ClientApp:
     
     def populate_game_list(self, games, error_msg=None):
         """Populate the game list UI with available games and destination entries."""
+        # Check if widget still exists (user might have closed settings)
+        try:
+            if not self.game_list_frame.winfo_exists():
+                return
+        except tk.TclError:
+            return
+
         # Clear existing entries
         for widget in self.game_list_frame.winfo_children():
             widget.destroy()

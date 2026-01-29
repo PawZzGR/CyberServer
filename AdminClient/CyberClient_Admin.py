@@ -59,7 +59,9 @@ SERVER_PORT = 5000
 STATION_NAME = "Unknown"
 FILE_SERVER_PORT = 5001
 SCAN_INTERVAL = 60  # Minutes
-SETTINGS_PASSWORD_HASH = None
+FILE_SERVER_PORT = 5001
+SCAN_INTERVAL = 60  # Minutes
+SETTINGS_PASSWORD_HASH = None # Default, will be loaded from config
 
 def get_app_data_dir():
     """Get the persistent AppData directory for settings."""
@@ -831,7 +833,10 @@ class ClientApp:
             self.sync_status_lbl.config(text="Status: Scanning...")
             def do_scan():
                 self.scan_and_update_index()
-                self.root.after(0, lambda: self.sync_status_lbl.config(text=f"Status: Scan complete! ({len(self.sync_folders)} folders)"))
+                def update_ui():
+                    if self.sync_status_lbl.winfo_exists():
+                        self.sync_status_lbl.config(text=f"Status: Scan complete! ({len(self.sync_folders)} folders)")
+                self.root.after(0, update_ui)
             threading.Thread(target=do_scan, daemon=True).start()
         
         tk.Button(sync_btn_frame, text="+ Add Folder", command=add_sync_folder, bg=self.BG_BUTTON, fg="white").pack(side="left", padx=5)

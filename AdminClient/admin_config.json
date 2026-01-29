@@ -1,7 +1,0 @@
-{
-    "client_machine": "Unknown",
-    "server_address": "192.168.1.6",
-    "server_port": 5000,
-    "sync_interval": 3600,
-    "settings_password_hash": "$2b$12$Kd5wRVV1aAVIGqc3pxRYc.YU2y5tr.UamFXuf.Wcq6lm2vaPdIdA6"
-}
