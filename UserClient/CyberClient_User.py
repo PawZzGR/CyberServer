@@ -606,6 +606,12 @@ class ClientApp:
         gear_btn = tk.Button(self.root, text="⚙", font=("Segoe UI", 10), bg=self.BG_MAIN, fg=self.TEXT_PRIMARY, bd=0, command=self.open_settings_password, cursor="hand2")
         gear_btn.place(relx=0.98, rely=0.02, anchor="ne")
         
+        # Maintenance Lock Button (if in maintenance mode)
+        if hasattr(self, 'maintenance_mode') and self.maintenance_mode:
+            tk.Label(self.root, text="MAINTENANCE MODE", font=("Segoe UI", 12, "bold"), fg="red", bg=self.BG_MAIN).pack(pady=10)
+            tk.Button(self.root, text="LOCK PC", command=self.restore_lock_screen, bg="#e74c3c", fg="white", font=("Segoe UI", 12, "bold")).pack(pady=5)
+            return # Don't show timer UI
+
         lbl = tk.Label(self.root, text="", font=("Segoe UI", 20, "bold"), bg=self.BG_MAIN, fg=self.TEXT_PRIMARY)
         lbl.pack(expand=True)
         
@@ -627,6 +633,7 @@ class ClientApp:
     
     def restore_lock_screen(self):
         """Restore full screen lock when session ends"""
+        self.maintenance_mode = False # Reset maintenance flag
         install_keyboard_hook()
         self.root.attributes("-topmost", True)
         self.root.overrideredirect(True)
@@ -713,6 +720,29 @@ class ClientApp:
             # Exponential backoff: 5, 10, 20, 30 (max)
             sleep_time = min(30, 5 * (2 ** max(0, fail_count - 1))) if fail_count > 0 else 5
             time.sleep(sleep_time)
+
+    def start_maintenance_session(self):
+        """Unlock the PC for maintenance without server connection."""
+        logging.info("Starting Maintenance Session")
+        self.maintenance_mode = True
+        uninstall_keyboard_hook()
+        self.timer_running = False # No timer
+        self.session_ended_naturally = False
+        self.reboot_countdown_active = False # Cancel any reboot
+        
+        # Close settings
+        if hasattr(self, 'close_settings_callback'):
+            self.close_settings_callback()
+            
+        # Show "Session" window but with Maintenance UI
+        self.clear_window()
+        self.root.overrideredirect(False)
+        self.root.attributes("-topmost", False) # Allow using other apps
+        self.root.geometry("300x150") # Small tool window
+        self.root.configure(bg=self.BG_MAIN)
+        
+        # Re-use start_session UI logic which we modified to handle maintenance_mode
+        self.start_session() 
 
     # --- SETTINGS / SYNC ---
 
@@ -899,9 +929,16 @@ class ClientApp:
                 self.game_sync_status.config(text="Status: Sync complete!")
             self.manual_sync(callback=on_complete)
         
+        
         tk.Button(win, text="Sync Now", command=sync_now, bg="#27AE60", fg="white", font=("Segoe UI", 10)).pack(pady=5)
             
         tk.Button(win, text="Save Settings", command=lambda: self.save_settings(win), bg=self.BG_BUTTON, fg="white", font=("Segoe UI", 10, "bold")).pack(pady=10)
+        
+        # Maintenance Unlock Button (Bottom)
+        ttk.Separator(win, orient="horizontal").pack(fill="x", pady=5)
+        mtn_frame = tk.Frame(win)
+        mtn_frame.pack(fill="x", pady=10)
+        tk.Button(mtn_frame, text="🔓 UNLOCK / MAINTENANCE", command=self.start_maintenance_session, bg="#e67e22", fg="white", font=("Segoe UI", 10, "bold")).pack()
         
         # Auto-refresh on open
         self.root.after(500, refresh_games)

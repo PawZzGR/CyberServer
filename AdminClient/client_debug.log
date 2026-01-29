@@ -31,3 +31,10 @@
 2026-01-29 13:14:49,817 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
 2026-01-29 13:14:50,065 - INFO - File server started on port 5001
 2026-01-29 13:14:52,063 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:34:53,930 - INFO - Starting AdminClient...
+2026-01-29 13:34:53,937 - INFO - Loaded config: SERVER=192.168.1.6:5000, STATION=Unknown
+2026-01-29 13:34:54,147 - INFO - File server started on port 5001
+2026-01-29 13:34:56,144 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:35:01,519 - INFO - Starting Maintenance Session
+2026-01-29 13:35:03,159 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:35:04,588 - WARNING - Connection failed to http://192.168.1.6:5000/api/ping: <urlopen error timed out>

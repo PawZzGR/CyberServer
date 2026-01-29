@@ -260,3 +260,36 @@
 2026-01-29 13:07:10,132 - INFO - Sync using direct admin config: 192.168.1.10:5001
 2026-01-29 13:07:15,142 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
 2026-01-29 13:07:15,143 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:30:29,087 - INFO - Starting UserClient...
+2026-01-29 13:30:29,088 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 13:30:34,376 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:30:36,013 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:30:39,362 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:30:41,025 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:30:44,371 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:30:44,386 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:30:44,464 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:30:46,503 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:30:47,472 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:30:49,470 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:30:51,507 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:30:52,487 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:30:59,397 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:00,799 - INFO - Starting UserClient...
+2026-01-29 13:32:00,800 - INFO - Loaded config from C:\Users\Kesid\AppData\Roaming\CyberClient\User\user_config.json
+2026-01-29 13:32:05,653 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:32:06,089 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:10,654 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:32:11,079 - INFO - Sync using direct admin config: 192.168.1.10:5001
+2026-01-29 13:32:16,090 - WARNING - [GAME SYNC] Admin health check failed: <urlopen error timed out>
+2026-01-29 13:32:16,090 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:18,334 - INFO - Starting Maintenance Session
+2026-01-29 13:32:27,853 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:31,096 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:36,231 - INFO - Using direct admin config: 192.168.1.10:5001
+2026-01-29 13:32:37,858 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:41,245 - ERROR - URLError fetching games: <urlopen error timed out>
+2026-01-29 13:32:47,798 - INFO - Starting Maintenance Session
+2026-01-29 13:32:52,860 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:56,107 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
+2026-01-29 13:32:57,838 - WARNING - Connection failed to http://192.168.1.125:5000/api/ping: <urlopen error timed out>
