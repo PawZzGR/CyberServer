@@ -1,4 +1,4 @@
-('C:\\Users\\Kesid\\Desktop\\CyberServer '
+('C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
  'V2\\build\\CyberClient_Admin\\PYZ-00.pyz',
  [('__future__',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\__future__.py',
@@ -424,7 +424,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\tkinter\\ttk.py',
    'PYMODULE'),
   ('toast',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\AdminClient\\toast.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\AdminClient\\toast.py',
    'PYMODULE'),
   ('token',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\token.py',
@@ -454,7 +455,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\urllib\\response.py',
    'PYMODULE'),
   ('utils',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\AdminClient\\utils.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\AdminClient\\utils.py',
    'PYMODULE'),
   ('zipfile',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\zipfile\\__init__.py',

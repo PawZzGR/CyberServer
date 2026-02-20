@@ -436,7 +436,9 @@ class ClientApp:
         self.username = None
         self.password = None
         self.remaining_seconds = 0
+        self.remaining_seconds = 0
         self.timer_running = False
+        self.popup_active = False # Track if a dialog/settings is open
         
         # Reboot countdown after session ends
         self.session_ended_naturally = False  # True only when time runs out
@@ -451,12 +453,11 @@ class ClientApp:
         self.setup_window()
         self.build_login_ui()
         
-        # Start hooks and monitors
-        install_keyboard_hook()
-        threading.Thread(target=pump_messages, daemon=True).start()
-        
         # Start file server for game sync immediately (system service behavior)
         self.start_game_sync_server()
+
+        # Start Smart Watchdog for Focus
+        self.check_lock_focus()
 
     def setup_window(self):
         self.root.configure(bg=self.BG_MAIN)
@@ -472,6 +473,29 @@ class ClientApp:
 
     def clear_window(self):
         for w in self.root.winfo_children(): w.destroy()
+
+    def check_lock_focus(self):
+        """Aggressive focus enforcement when locked."""
+        # IF session is running OR maintenance mode OR popup open -> Do NOT enforce focus
+        if self.timer_running or getattr(self, 'maintenance_mode', False) or self.popup_active:
+            # Relax topmost if we just switched state
+            if self.root.attributes("-topmost"):
+                self.root.attributes("-topmost", False)
+            
+            # Re-check less frequently just to be safe, or stop entirely
+            self.root.after(1000, self.check_lock_focus)
+            return
+
+        # OTHERWISE (Locked): Force window to top
+        try:
+            self.root.attributes("-topmost", True)
+            self.root.lift()
+            # self.root.focus_force() # Optional: can be annoying if typing elsewhere
+        except:
+            pass
+            
+        # Check again in 100ms
+        self.root.after(100, self.check_lock_focus)
 
     # --- UI ---
 
@@ -618,8 +642,14 @@ class ClientApp:
                 time.sleep(1)
                 self.remaining_seconds -= 1
                 if self.remaining_seconds % 5 == 0: self.send_update()
+            
+            # Check why loop ended
+            if self.remaining_seconds <= 0:
+                 self.session_ended_naturally = True
+            else:
+                 self.session_ended_naturally = False
+                 
             self.timer_running = False
-            self.session_ended_naturally = True  # Mark that session ended due to time
             self.send_update()
             # Restore full lock screen
             self.root.after(0, self.restore_lock_screen)
@@ -642,10 +672,10 @@ class ClientApp:
             self.start_reboot_countdown()
     
     def start_reboot_countdown(self):
-        """Start 60-second countdown to reboot. Only cancelled by successful login."""
+        """Start 120-second countdown to reboot. Only cancelled by successful login."""
         self.reboot_countdown_active = True
-        self.reboot_countdown_seconds = 60
-        logging.info("Starting reboot countdown (60 seconds)")
+        self.reboot_countdown_seconds = 120
+        logging.info("Starting reboot countdown (120 seconds)")
         
         def countdown():
             while self.reboot_countdown_seconds > 0:
@@ -698,16 +728,22 @@ class ClientApp:
             self.timer_running = False
 
     def connection_checker(self):
+        def safe_update(text, fg, bg):
+            try:
+                if self.lbl_status.winfo_exists():
+                    self.lbl_status.config(text=text, fg=fg, bg=bg)
+            except: pass
+
         while self.check_conn_running:
             try:
                 with request.urlopen(PING_URL, timeout=2) as r:
                     if r.status == 200:
-                        self.root.after(0, lambda: self.lbl_status.config(text="CONNECTED", fg="#00FF00", bg=self.BG_CARD))
+                        self.root.after(0, lambda: safe_update("CONNECTED", "#00FF00", self.BG_CARD))
                     else:
                         raise Exception(f"HTTP {r.status}")
             except Exception as e:
                 logging.warning(f"Connection failed to {PING_URL}: {e}")
-                self.root.after(0, lambda: self.lbl_status.config(text="DISCONNECTED", fg="#FF5252", bg=self.BG_CARD))
+                self.root.after(0, lambda: safe_update("DISCONNECTED", "#FF5252", self.BG_CARD))
             time.sleep(5)
 
     def start_maintenance_session(self):
@@ -744,41 +780,56 @@ class ClientApp:
             return False
 
     def open_settings_password(self):
+        """Ask for password before opening settings."""
         global SETTINGS_PASSWORD_HASH
-        
-        if not SETTINGS_PASSWORD_HASH:
-            # First time setup
-            pwd = simpledialog.askstring("Settings Setup", "Set a password for Admin Settings:", show="*", parent=self.root)
-            if pwd:
-                try:
-                    hashed = hash_password(pwd)
-                    SETTINGS_PASSWORD_HASH = hashed
-                    
-                    # Save immediately
-                    new_conf = {
-                        "client_machine": STATION_NAME,
-                        "server_address": SERVER_HOST,
-                        "server_port": SERVER_PORT,
-                        "sync_interval": SYNC_INTERVAL,
-                        "settings_password_hash": SETTINGS_PASSWORD_HASH
-                    }
-                    save_json_atomic(get_config_path(), new_conf)
-                    
-                    messagebox.showinfo("Setup", "Password set! opening settings...", parent=self.root)
-                    self.open_settings_ui()
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to set password: {e}")
-            return
+        self.popup_active = True
+        try:
+            self.root.attributes("-topmost", False) # Allow dialog to float
+            
+            if not SETTINGS_PASSWORD_HASH:
+                # First time setup
+                pwd = simpledialog.askstring("Settings Setup", "Set a password for Admin Settings:", show="*", parent=self.root)
+                if pwd:
+                    try:
+                        hashed = hash_password(pwd)
+                        SETTINGS_PASSWORD_HASH = hashed
+                        
+                        # Save immediately
+                        new_conf = {
+                            "client_machine": STATION_NAME,
+                            "server_address": SERVER_HOST,
+                            "server_port": SERVER_PORT,
+                            "sync_interval": SYNC_INTERVAL,
+                            "settings_password_hash": SETTINGS_PASSWORD_HASH
+                        }
+                        save_json_atomic(get_config_path(), new_conf)
+                        
+                        messagebox.showinfo("Setup", "Password set! opening settings...", parent=self.root)
+                        self.open_settings_ui()
+                    except Exception as e:
+                        messagebox.showerror("Error", f"Failed to set password: {e}")
+                
+                if not hasattr(self, 'settings_open'): 
+                    self.popup_active = False
+                return
 
-        pwd = simpledialog.askstring("Settings", "Enter Password:", show="*", parent=self.root)
-        if pwd and self.check_settings_password(pwd):
-            self.open_settings_ui()
-        elif pwd:
-            messagebox.showerror("Error", "Wrong password")
+            pwd = simpledialog.askstring("Settings", "Enter Password:", show="*", parent=self.root)
+            if pwd and self.check_settings_password(pwd):
+                self.open_settings_ui()
+            elif pwd:
+                messagebox.showerror("Error", "Wrong password")
+                self.popup_active = False
+            else:
+                 self.popup_active = False
+                 
+        except:
+             self.popup_active = False
 
     def open_settings_ui(self):
         # Relax main window (security restored on close)
         self.root.attributes("-topmost", False)
+        self.popup_active = True
+        self.settings_open = True
         
         win = tk.Toplevel(self.root)
         win.title("Admin Client Settings")
@@ -787,7 +838,14 @@ class ClientApp:
         win.focus_force()
         win.grab_set() # Modal
         
-        self.close_settings_callback = lambda: self.close_settings_ui(win)
+        def on_close():
+            self.popup_active = False
+            if hasattr(self, 'settings_open'): del self.settings_open
+            win.destroy()
+            if not self.maintenance_mode and not self.timer_running:
+                self.root.attributes("-topmost", True)
+
+        self.close_settings_callback = on_close
         win.protocol("WM_DELETE_WINDOW", self.close_settings_callback)
         
         # --- Config Section ---
@@ -1062,7 +1120,46 @@ class ClientApp:
         except Exception as e:
             print(f"[GAME SYNC] Error removing folder from server: {e}")
 
+
+def early_lock_enforcer(root):
+    """
+    THREAD: Aggressively force window to foreground during startup (first 5 seconds).
+    """
+    try:
+        hwnd = 0
+        for _ in range(50):
+            try:
+                hwnd = ctypes.windll.user32.GetForegroundWindow() 
+                if root.winfo_id():
+                    hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+                    if not hwnd: hwnd = root.winfo_id()
+                    break
+            except: pass
+            time.sleep(0.1)
+        # Aggressive loop for 20 seconds
+        end_time = time.time() + 20
+        while time.time() < end_time:
+            root.after(0, lambda: root.attributes("-topmost", True))
+            root.after(0, lambda: root.lift())
+            root.after(0, lambda: root.focus_force())
+            
+            if hwnd:
+                ctypes.windll.user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002)
+                ctypes.windll.user32.SetForegroundWindow(hwnd)
+                
+            time.sleep(0.1)
+    except Exception as e:
+        print(f"Early lock error: {e}")
+
 if __name__ == "__main__":
+    # 1. IMMEDIATE LOCK (Before loading anything else)
+    install_keyboard_hook()
+    threading.Thread(target=pump_messages, daemon=True).start()
+
     root = tk.Tk()
-    ClientApp(root)
+    
+    # 2. START EARLY LOCK ENFORCER
+    threading.Thread(target=early_lock_enforcer, args=(root,), daemon=True).start()
+    
+    app = ClientApp(root)
     root.mainloop()

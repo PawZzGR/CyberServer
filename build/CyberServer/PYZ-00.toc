@@ -1,4 +1,5 @@
-('C:\\Users\\Kesid\\Desktop\\CyberServer V2\\build\\CyberServer\\PYZ-00.pyz',
+('C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+ 'V2\\build\\CyberServer\\PYZ-00.pyz',
  [('__future__',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\__future__.py',
    'PYMODULE'),
@@ -123,7 +124,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\annotationlib.py',
    'PYMODULE'),
   ('api',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\api.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\api.py',
    'PYMODULE'),
   ('argparse',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\argparse.py',
@@ -285,7 +287,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\codeop.py',
    'PYMODULE'),
   ('common',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\common.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\common.py',
    'PYMODULE'),
   ('compression',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\compression\\__init__.py',
@@ -375,7 +378,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\ctypes\\wintypes.py',
    'PYMODULE'),
   ('database',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\database.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\database.py',
    'PYMODULE'),
   ('dataclasses',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\dataclasses.py',
@@ -471,7 +475,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\glob.py',
    'PYMODULE'),
   ('gui',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\gui.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\gui.py',
    'PYMODULE'),
   ('gzip',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\gzip.py',
@@ -1333,7 +1338,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\tkinter\\ttk.py',
    'PYMODULE'),
   ('toast',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\toast.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\toast.py',
    'PYMODULE'),
   ('token',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\token.py',
@@ -1414,7 +1420,8 @@
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\urllib\\response.py',
    'PYMODULE'),
   ('utils',
-   'C:\\Users\\Kesid\\Desktop\\CyberServer V2\\Server\\utils.py',
+   'C:\\Users\\Kesid\\Desktop\\AntigravityProjects\\CyberServer '
+   'V2\\Server\\utils.py',
    'PYMODULE'),
   ('webbrowser',
    'C:\\Users\\Kesid\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\webbrowser.py',
