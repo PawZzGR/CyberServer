@@ -613,6 +613,8 @@ class ClientApp:
                 msg = "Account does not exist"
             elif reason == "no_time":
                 msg = "No remaining time"
+            elif reason == "already_logged_in":
+                msg = "Ο λογαριασμός αυτός χρησιμοποιείται ηδη."
             else:
                 msg = reason or "Unknown error"
             messagebox.showerror("Login Failed", msg)

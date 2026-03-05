@@ -69,6 +69,22 @@ class RequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "error", "reason": "no_time"})
             return
 
+        current_time = time.time()
+        with ACTIVE_LOCK:
+            stale_stations = []
+            for st, session in ACTIVE_SESSIONS.items():
+                if session.get("username") == username:
+                    if st != station and current_time - session.get("last_update", 0) < 30:
+                        logger.warning(f"Login denied for {username} on {station}: already logged in on {st}")
+                        self._send_json(200, {"status": "error", "reason": "already_logged_in"})
+                        return
+                    else:
+                        stale_stations.append(st)
+            
+            for st in stale_stations:
+                if st != station:
+                    del ACTIVE_SESSIONS[st]
+
         login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with ACTIVE_LOCK:
             ACTIVE_SESSIONS[station] = {
