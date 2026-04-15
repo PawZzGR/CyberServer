@@ -4,10 +4,10 @@ datas, binaries, hiddenimports = collect_all('tkcalendar')
 
 a = Analysis(
     ['Server\\main.py'],
-    pathex=[],
+    pathex=['.'],
     binaries=binaries,
-    datas=[('Server\\server_config.json', '.'), ('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.')] + datas,
-    hiddenimports=hiddenimports,
+    datas=[('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.'), ('auto_updater.py', '.')] + datas,
+    hiddenimports=['auto_updater'] + hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

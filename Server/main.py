@@ -5,6 +5,13 @@ from api import run_http_server
 from gui import ServerApp
 
 def main():
+    # 0. Check for updates (will restart if update found)
+    try:
+        import auto_updater
+        auto_updater.check_for_updates()
+    except Exception:
+        pass  # Continue even if update check fails
+
     # 1. Initialize Database
     db.init_db()
 

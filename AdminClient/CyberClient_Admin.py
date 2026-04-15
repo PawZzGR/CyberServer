@@ -1154,6 +1154,13 @@ def early_lock_enforcer(root):
         print(f"Early lock error: {e}")
 
 if __name__ == "__main__":
+    # 0. Check for updates (will restart if update found)
+    try:
+        import auto_updater
+        auto_updater.check_for_updates()
+    except Exception:
+        pass  # Continue even if update check fails
+
     # 1. IMMEDIATE LOCK (Before loading anything else)
     install_keyboard_hook()
     threading.Thread(target=pump_messages, daemon=True).start()

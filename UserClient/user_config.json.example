@@ -1,0 +1,9 @@
+{
+    "client_machine": "Station1",
+    "server_address": "192.168.1.100",
+    "server_port": 5000,
+    "admin_address": "192.168.1.100",
+    "admin_port": 5001,
+    "sync_interval": 5,
+    "game_sync_interval": 30
+}

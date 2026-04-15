@@ -3,10 +3,10 @@
 
 a = Analysis(
     ['AdminClient\\CyberClient_Admin.py'],
-    pathex=[],
+    pathex=['.'],
     binaries=[],
-    datas=[('AdminClient\\sync_folders.json', '.'), ('AdminClient\\client_admin_mappings.json', '.'), ('AdminClient\\toast.py', '.'), ('AdminClient\\utils.py', '.'), ('AdminClient\\common.py', '.'), ('background.png', '.')],
-    hiddenimports=[],
+    datas=[('AdminClient\\toast.py', '.'), ('AdminClient\\utils.py', '.'), ('AdminClient\\common.py', '.'), ('background.png', '.'), ('auto_updater.py', '.')],
+    hiddenimports=['auto_updater'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

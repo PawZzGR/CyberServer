@@ -1,0 +1,33 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ===== PyInstaller =====
+build/
+dist/
+
+# ===== Runtime Data (never track!) =====
+*.db
+*.log
+*.log.*
+last_ticket.txt
+
+# ===== Local Config (each machine has its own) =====
+user_config.json
+client_config.json
+server_config.json
+game_mappings.json
+client_admin_mappings.json
+sync_folders.json
+
+# ===== IDE / OS =====
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ===== Logs folder (created at runtime) =====
+logs/
