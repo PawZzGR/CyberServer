@@ -1,12 +1,13 @@
-# -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
 
+datas, binaries, hiddenimports = collect_all('tkcalendar')
 
 a = Analysis(
     ['Server\\main.py'],
     pathex=[],
-    binaries=[],
-    datas=[('Server\\server_config.json', '.'), ('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.')],
-    hiddenimports=[],
+    binaries=binaries,
+    datas=[('Server\\server_config.json', '.'), ('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.')] + datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

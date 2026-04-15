@@ -614,7 +614,7 @@ class ClientApp:
             elif reason == "no_time":
                 msg = "No remaining time"
             elif reason == "already_logged_in":
-                msg = "Ο λογαριασμός αυτός χρησιμοποιείται ηδη."
+                msg = "This account is already being used."
             else:
                 msg = reason or "Unknown error"
             messagebox.showerror("Login Failed", msg)
@@ -1197,6 +1197,94 @@ class ClientApp:
         self.root.attributes("-topmost", True)
         self.root.focus_force()
 
+    # -------- SYNC LOGGING & CLEANUP --------
+
+    def _get_logs_dir(self):
+        """Get the logs directory next to the EXE."""
+        logs_dir = os.path.join(self.base_dir, "logs")
+        try:
+            os.makedirs(logs_dir, exist_ok=True)
+        except Exception:
+            pass
+        return logs_dir
+
+    def _log_sync(self, message, level="INFO"):
+        """Write a sync log entry to the logs folder next to the EXE."""
+        try:
+            logs_dir = self._get_logs_dir()
+            today = time.strftime("%Y-%m-%d")
+            log_file = os.path.join(logs_dir, f"sync_{today}.log")
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(f"[{timestamp}] [{level}] {message}\n")
+        except Exception as e:
+            logging.error(f"Failed to write sync log: {e}")
+
+    def _cleanup_default_folder(self):
+        """Remove any leftover files from the default Games folder.
+        
+        Games should NEVER run from the default folder — they should
+        always have a custom mapping pointing to the actual install path.
+        """
+        default_folder = os.path.join(self.base_dir, "Games")
+        if not os.path.exists(default_folder):
+            return
+        
+        try:
+            contents = os.listdir(default_folder)
+            if not contents:
+                return
+            
+            import shutil
+            total_size = 0
+            for item in contents:
+                item_path = os.path.join(default_folder, item)
+                if os.path.isdir(item_path):
+                    for root, dirs, fnames in os.walk(item_path):
+                        for fname in fnames:
+                            try:
+                                total_size += os.path.getsize(os.path.join(root, fname))
+                            except OSError:
+                                pass
+                else:
+                    try:
+                        total_size += os.path.getsize(item_path)
+                    except OSError:
+                        pass
+            
+            self._log_sync(f"CLEANUP: Found {len(contents)} item(s) ({total_size / (1024*1024):.1f} MB) in default folder '{default_folder}'")
+            
+            for item in contents:
+                item_path = os.path.join(default_folder, item)
+                try:
+                    if os.path.isdir(item_path):
+                        shutil.rmtree(item_path)
+                    else:
+                        os.remove(item_path)
+                    self._log_sync(f"CLEANUP: Deleted '{item}'")
+                except Exception as e:
+                    self._log_sync(f"CLEANUP: Failed to delete '{item}': {e}", "ERROR")
+            
+            self._log_sync(f"CLEANUP: Complete. Freed ~{total_size / (1024*1024):.1f} MB")
+        except Exception as e:
+            self._log_sync(f"CLEANUP: Error during cleanup: {e}", "ERROR")
+
+    def _check_all_mappings(self, admin_folders):
+        """Check if all games from Admin have custom mappings.
+        
+        Returns (ok, missing_list). If ok is False, sync should not proceed.
+        """
+        game_names = set()
+        for folder_path in admin_folders:
+            game_names.add(os.path.basename(folder_path))
+        
+        missing = []
+        for name in sorted(game_names):
+            if name not in self.game_mappings or not self.game_mappings[name].strip():
+                missing.append(name)
+        
+        return len(missing) == 0, missing
+
     # -------- GAME SYNC METHODS (Download from AdminClient) --------
     
     def start_game_sync(self):
@@ -1339,32 +1427,41 @@ class ClientApp:
             print(f"[GAME SYNC] Admin not responding ({e}), skipping sync")
             return
         
+        # Cleanup any leftover files from the default Games folder
+        self._cleanup_default_folder()
+        
         # Get file index directly from Admin (P2P)
         files, admin_folders = self.get_file_index_from_admin(admin_ip, admin_port)
         if not files:
-            print("[GAME SYNC] No files to sync (Admin may have no folders or connection failed)")
+            self._log_sync("No files to sync (Admin has no folders or connection failed)")
+            print("[GAME SYNC] No files to sync")
             return
         
-        print(f"[GAME SYNC] Syncing {len(files)} files from {admin_ip}:{admin_port}")
+        # CHECK: All games must have custom mappings before sync proceeds
+        all_mapped, missing = self._check_all_mappings(admin_folders)
+        if not all_mapped:
+            self._log_sync(f"SYNC BLOCKED: {len(missing)} game(s) have no custom mapping:", "WARNING")
+            for name in missing:
+                self._log_sync(f"  - '{name}' has no destination configured", "WARNING")
+            self._log_sync("Set a custom destination for ALL games in Settings -> Game Sync before sync can proceed.", "WARNING")
+            print(f"[GAME SYNC] BLOCKED: {len(missing)} game(s) missing mappings. Check logs/ folder.")
+            return
         
-        # Build download list (admin_folders already available from get_file_index_from_admin)
+        self._log_sync(f"All games have mappings. Checking {len(files)} files for updates...")
+        print(f"[GAME SYNC] Checking {len(files)} files from {admin_ip}:{admin_port}")
+        
+        # Build download list
         download_list = []
         total_size = 0
         
         for f in files:
             folder_path = f.get("folder_path")
-            folder_idx = f.get("folder_idx", 0)  # Already in the file data from scanning
+            folder_idx = f.get("folder_idx", 0)
             
             folder_name = os.path.basename(folder_path)
             
-            # Get mapped destination or use default
-            raw_local_folder = self.game_mappings.get(folder_name)
-            if raw_local_folder:
-                local_folder = normalize_path(raw_local_folder)
-                print(f"[GAME SYNC] Using custom mapping for '{folder_name}': {raw_local_folder} -> {local_folder}")
-            else:
-                local_folder = os.path.join(self.download_folder, folder_name)
-                print(f"[GAME SYNC] Using default folder for '{folder_name}': {local_folder}")
+            # Use custom mapping ONLY (no default fallback)
+            local_folder = normalize_path(self.game_mappings[folder_name])
             
             rel_path = f.get("relative_path", "")
             remote_mtime = f.get("modified_time", 0)
@@ -1388,6 +1485,7 @@ class ClientApp:
                 total_size += remote_size
         
         if not download_list:
+            self._log_sync("All files are up to date. No downloads needed.")
             print("[GAME SYNC] All files up to date")
             return
         
@@ -1429,6 +1527,7 @@ class ClientApp:
                 fail_count += 1
                 print(f"[GAME SYNC] FAILED: {item['rel_path']}")
         
+        self._log_sync(f"Sync complete. Downloaded: {success_count}, Failed: {fail_count}")
         print(f"[GAME SYNC] Complete! Success: {success_count}, Failed: {fail_count}")
         
         # Complete

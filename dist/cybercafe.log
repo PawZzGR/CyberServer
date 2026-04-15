@@ -1,0 +1,3 @@
+2026-03-18 15:59:56 - cybercafe - INFO - Migrated DB: Added session_paid_seconds column
+2026-03-18 15:59:56 - cybercafe - INFO - Migrated DB: Added session_awarded_rules column
+2026-03-18 15:59:57 - cybercafe - INFO - Database initialized

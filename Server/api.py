@@ -58,10 +58,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         username = data.get("username", "")
         password = data.get("password", "")
         station = data.get("station", "Unknown")
+        client_ip = self.client_address[0]
+        session_key = f"{station}@{client_ip}"  # Unique key: station name + IP
 
         user = db.get_user(username)
         if not user or not verify_password(password, user["password"]):
-            logger.warning(f"Failed login attempt for {username} from {station}")
+            logger.warning(f"Failed login attempt for {username} from {station} ({client_ip})")
             self._send_json(200, {"status": "error", "reason": "not_found"})
             return
         if user["remaining_seconds"] <= 0:
@@ -71,38 +73,43 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         current_time = time.time()
         with ACTIVE_LOCK:
-            stale_stations = []
-            for st, session in ACTIVE_SESSIONS.items():
+            stale_keys = []
+            for key, session in ACTIVE_SESSIONS.items():
                 if session.get("username") == username:
-                    if st != station and current_time - session.get("last_update", 0) < 30:
-                        logger.warning(f"Login denied for {username} on {station}: already logged in on {st}")
+                    if key != session_key and current_time - session.get("last_update", 0) < 30:
+                        logger.warning(f"Login denied for {username} on {session_key}: already logged in on {key}")
                         self._send_json(200, {"status": "error", "reason": "already_logged_in"})
                         return
                     else:
-                        stale_stations.append(st)
+                        stale_keys.append(key)
             
-            for st in stale_stations:
-                if st != station:
-                    del ACTIVE_SESSIONS[st]
+            for key in stale_keys:
+                if key != session_key:
+                    del ACTIVE_SESSIONS[key]
 
         login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with ACTIVE_LOCK:
-            ACTIVE_SESSIONS[station] = {
+            ACTIVE_SESSIONS[session_key] = {
                 "username": user["username"],
+                "station": station,
+                "client_ip": client_ip,
                 "remaining_seconds": user["remaining_seconds"],
                 "last_update": time.time(),
                 "login_time": login_time,
             }
 
         db.log_session(user["id"], user["username"], station, "login", login_time=login_time, remaining_seconds=user["remaining_seconds"])
-        logger.info(f"User {username} logged in on {station}")
+        logger.info(f"User {username} logged in on {session_key}")
         
         self._send_json(200, {"status": "ok", "remaining_seconds": user["remaining_seconds"]})
+
 
     def handle_update_remaining(self, data):
         username = data.get("username", "")
         password = data.get("password", "")
         station = data.get("station", "Unknown")
+        client_ip = self.client_address[0]
+        session_key = f"{station}@{client_ip}"  # Must match login key
         remaining_seconds = data.get("remaining_seconds", None)
 
         if remaining_seconds is None:
@@ -118,7 +125,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         if value < 0: value = 0
         
         with ACTIVE_LOCK:
-            entry = ACTIVE_SESSIONS.get(station)
+            entry = ACTIVE_SESSIONS.get(session_key)
             was_active = entry is not None and entry.get("remaining_seconds", 0) > 0
             
         if was_active and value == 0:
@@ -131,20 +138,23 @@ class RequestHandler(BaseHTTPRequestHandler):
                 except: pass
             
             db.log_session(user["id"], user["username"], station, "logout", login_time=login_time, logout_time=logout_time, duration_seconds=duration, remaining_seconds=value)
-            logger.info(f"User {username} logged out from {station}")
+            logger.info(f"User {username} logged out from {session_key}")
 
         db.update_remaining_seconds(user["id"], value)
 
         with ACTIVE_LOCK:
-            entry = ACTIVE_SESSIONS.get(station)
+            entry = ACTIVE_SESSIONS.get(session_key)
             if entry is None:
-                ACTIVE_SESSIONS[station] = {"username": user["username"], "remaining_seconds": value, "last_update": time.time()}
+                ACTIVE_SESSIONS[session_key] = {"username": user["username"], "station": station, "client_ip": client_ip, "remaining_seconds": value, "last_update": time.time()}
             else:
                 entry["username"] = user["username"]
+                entry["station"] = station
+                entry["client_ip"] = client_ip
                 entry["remaining_seconds"] = value
                 entry["last_update"] = time.time()
 
         self._send_json(200, {"status": "ok"})
+
 
     def log_message(self, format, *args):
         return
