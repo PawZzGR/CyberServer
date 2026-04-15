@@ -13,7 +13,7 @@ import logging
 import subprocess
 from urllib import request, error
 
-VERSION = "2.4.0"
+VERSION = "2.5.0"
 GITHUB_REPO = "PawZzGR/CyberServer"
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 UPDATE_CHECK_TIMEOUT = 10  # seconds
