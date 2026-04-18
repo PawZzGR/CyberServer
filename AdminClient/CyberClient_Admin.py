@@ -11,6 +11,17 @@ from ctypes import wintypes
 import subprocess
 import logging
 
+# Add parent directory to sys.path to find auto_updater.py when running from source
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Import auto_updater for version info and manual update checks
+try:
+    import auto_updater
+except ImportError:
+    auto_updater = None
+
 # Configure basic debugging logger
 logging.basicConfig(
     filename='client_debug.log',
@@ -20,9 +31,10 @@ logging.basicConfig(
 logging.info("Starting AdminClient...")
 try:
     from utils import hash_password, verify_password
-except ImportError:
-    # If utils not found (e.g. frozen without it), fallback or error
-    pass
+except Exception:
+    # Fallback if utils missing or bcrypt not installed
+    def hash_password(pwd): return pwd
+    def verify_password(pwd, hashed): return pwd == hashed
 
 # Import toast if available
 try:
@@ -439,6 +451,7 @@ class ClientApp:
         self.remaining_seconds = 0
         self.timer_running = False
         self.popup_active = False # Track if a dialog/settings is open
+        self.maintenance_mode = False # Track if maintenance is active
         
         # Reboot countdown after session ends
         self.session_ended_naturally = False  # True only when time runs out
@@ -527,7 +540,10 @@ class ClientApp:
         
         # Header
         tk.Label(card, text="CyberClient", font=("Segoe UI", 28, "bold"), bg=self.BG_CARD, fg=self.TEXT_PRIMARY).pack(pady=(0, 5))
-        tk.Label(card, text="Administrator Access", font=("Segoe UI", 12), bg=self.BG_CARD, fg=self.ACCENT).pack(pady=(0, 30))
+        tk.Label(card, text="Administrator Access", font=("Segoe UI", 12), bg=self.BG_CARD, fg=self.ACCENT).pack(pady=(0, 5))
+        # Version label
+        _ver = auto_updater.VERSION if auto_updater else "?.?.?"
+        tk.Label(card, text=f"v{_ver}", font=("Segoe UI", 9), bg=self.BG_CARD, fg="#999999").pack(pady=(0, 20))
         
         # Custom Entry Style Helper
         def create_entry(parent, placeholder, is_password=False):
@@ -844,7 +860,7 @@ class ClientApp:
             self.popup_active = False
             if hasattr(self, 'settings_open'): del self.settings_open
             win.destroy()
-            if not self.maintenance_mode and not self.timer_running:
+            if not getattr(self, 'maintenance_mode', False) and not self.timer_running:
                 self.root.attributes("-topmost", True)
 
         self.close_settings_callback = on_close
@@ -944,6 +960,13 @@ class ClientApp:
             
         tk.Button(win, text="Save Settings", command=lambda: self.save_settings(win), bg=self.BG_BUTTON, fg="white", font=("Segoe UI", 10, "bold")).pack(pady=10)
         
+        # --- Updates Section ---
+        ttk.Separator(win, orient="horizontal").pack(fill="x", pady=5)
+        tk.Label(win, text="Updates", font=("Segoe UI", 12, "bold"), fg=self.ACCENT).pack(pady=(5, 2))
+        _ver = auto_updater.VERSION if auto_updater else "?.?.?"
+        tk.Label(win, text=f"Current version: v{_ver}", font=("Segoe UI", 9), fg="#666666").pack(pady=2)
+        tk.Button(win, text="🔄 Check for Updates", command=lambda: self.check_updates_ui(win), bg="#3498DB", fg="white", font=("Segoe UI", 10)).pack(pady=5)
+        
         # Maintenance Unlock Button (Bottom)
         ttk.Separator(win, orient="horizontal").pack(fill="x", pady=5)
         mtn_frame = tk.Frame(win)
@@ -983,6 +1006,77 @@ class ClientApp:
             return
 
         self.close_settings_ui(win)
+
+    def check_updates_ui(self, parent_win):
+        """Check for updates and show result in a popup."""
+        if not auto_updater:
+            messagebox.showerror("Error", "Update module not available.", parent=parent_win)
+            return
+        
+        # Show checking message
+        checking_lbl = tk.Label(parent_win, text="Checking for updates...", font=("Segoe UI", 9, "italic"), fg="orange")
+        checking_lbl.pack(pady=2)
+        parent_win.update()
+        
+        def do_check():
+            result = auto_updater.check_for_updates_manual()
+            self.root.after(0, lambda: show_result(result))
+        
+        def show_result(result):
+            # Remove "checking" label
+            try:
+                checking_lbl.destroy()
+            except:
+                pass
+            
+            if "error" in result:
+                messagebox.showerror("Update Check Failed", result["error"], parent=parent_win)
+                return
+            
+            if not result.get("update_available"):
+                messagebox.showinfo("Up to Date", "✅ Cyber is up to date.", parent=parent_win)
+                return
+            
+            # New version available — show Update/Cancel dialog
+            remote_ver = result.get("remote_version", "?")
+            download_url = result.get("download_url")
+            asset_size = result.get("asset_size", 0)
+            
+            popup = tk.Toplevel(parent_win)
+            popup.title("Update Available")
+            popup.geometry("380x180")
+            popup.resizable(False, False)
+            popup.attributes("-topmost", True)
+            popup.transient(parent_win)
+            popup.grab_set()
+            
+            # Center on parent
+            popup.update_idletasks()
+            x = parent_win.winfo_x() + (parent_win.winfo_width() // 2) - 190
+            y = parent_win.winfo_y() + (parent_win.winfo_height() // 2) - 90
+            popup.geometry(f"+{x}+{y}")
+            
+            tk.Label(popup, text="🚀 Update Available", font=("Segoe UI", 14, "bold"), fg=self.ACCENT).pack(pady=(15, 5))
+            tk.Label(popup, text=f"New version of Cyber is available! ({remote_ver})", font=("Segoe UI", 10)).pack(pady=5)
+            current_ver = auto_updater.VERSION
+            tk.Label(popup, text=f"Current: v{current_ver}  →  New: {remote_ver}", font=("Segoe UI", 9), fg="#666666").pack(pady=2)
+            
+            btn_frame = tk.Frame(popup)
+            btn_frame.pack(pady=15)
+            
+            def do_update():
+                popup.destroy()
+                messagebox.showinfo("Updating", "Downloading update... The application will restart.", parent=parent_win)
+                def run_update():
+                    err = auto_updater.download_and_apply_update(download_url, asset_size)
+                    if err:
+                        self.root.after(0, lambda: messagebox.showerror("Update Failed", err, parent=parent_win))
+                threading.Thread(target=run_update, daemon=True).start()
+            
+            tk.Button(btn_frame, text="Update", command=do_update, bg="#27AE60", fg="white", font=("Segoe UI", 10, "bold"), width=10, cursor="hand2").pack(side="left", padx=10)
+            tk.Button(btn_frame, text="Cancel", command=popup.destroy, bg="#95A5A6", fg="white", font=("Segoe UI", 10), width=10, cursor="hand2").pack(side="left", padx=10)
+        
+        threading.Thread(target=do_check, daemon=True).start()
 
     def close_settings_ui(self, win):
         try: win.destroy()

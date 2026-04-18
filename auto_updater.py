@@ -172,3 +172,128 @@ def check_for_updates():
                 os.remove(new_path)
         except Exception:
             pass
+
+
+def check_for_updates_manual():
+    """Check GitHub for a newer release WITHOUT auto-downloading.
+    
+    Returns a dict with the check result:
+        {"update_available": True, "remote_version": "2.6.0", "download_url": "...", "asset_size": 12345}
+        {"update_available": False, "remote_version": "2.5.0"}
+        {"error": "Could not reach GitHub..."}
+    """
+    exe_name = get_exe_name()
+    # If running as script (not EXE), still allow checking but won't have asset match
+    if not exe_name:
+        exe_name = "CyberClient_User.exe"  # Fallback for dev/testing
+    
+    try:
+        req = request.Request(
+            GITHUB_API_URL,
+            headers={"User-Agent": "CyberServer-AutoUpdater"}
+        )
+        with request.urlopen(req, timeout=UPDATE_CHECK_TIMEOUT) as resp:
+            release = json.loads(resp.read().decode())
+        
+        remote_version = release.get("tag_name", "0.0.0")
+        remote_tuple = parse_version(remote_version)
+        local_tuple = parse_version(VERSION)
+        
+        if remote_tuple <= local_tuple:
+            return {"update_available": False, "remote_version": remote_version}
+        
+        # Find matching asset
+        assets = release.get("assets", [])
+        download_url = None
+        asset_size = 0
+        
+        for asset in assets:
+            if asset.get("name") == exe_name:
+                download_url = asset.get("browser_download_url")
+                asset_size = asset.get("size", 0)
+                break
+        
+        return {
+            "update_available": True,
+            "remote_version": remote_version,
+            "download_url": download_url,
+            "asset_size": asset_size
+        }
+        
+    except error.URLError as e:
+        return {"error": f"Cannot reach GitHub (offline?): {e}"}
+    except Exception as e:
+        return {"error": f"Update check failed: {e}"}
+
+
+def download_and_apply_update(download_url, asset_size=0):
+    """Download a new EXE from the given URL, replace the current one, and restart.
+    
+    Args:
+        download_url: Direct download URL for the new EXE asset.
+        asset_size: Expected file size in bytes (0 to skip verification).
+    
+    Returns:
+        None on success (process restarts).
+        str error message on failure.
+    """
+    exe_path = get_exe_path()
+    if not exe_path:
+        return "Cannot update: not running as a compiled EXE."
+    
+    if not download_url:
+        return "No download URL available for this executable."
+    
+    exe_name = get_exe_name()
+    
+    try:
+        new_path = exe_path + ".new"
+        logging.info(f"[MANUAL-UPDATE] Downloading {exe_name} ({asset_size / (1024*1024):.1f} MB)...")
+        
+        req = request.Request(
+            download_url,
+            headers={"User-Agent": "CyberServer-AutoUpdater"}
+        )
+        with request.urlopen(req, timeout=300) as resp:
+            with open(new_path, 'wb') as f:
+                bytes_downloaded = 0
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    bytes_downloaded += len(chunk)
+        
+        # Verify download size
+        if asset_size > 0 and bytes_downloaded != asset_size:
+            os.remove(new_path)
+            return f"Download size mismatch: got {bytes_downloaded}, expected {asset_size}"
+        
+        logging.info(f"[MANUAL-UPDATE] Downloaded successfully ({bytes_downloaded / (1024*1024):.1f} MB)")
+        
+        # Replace: current → .old, .new → current
+        old_path = exe_path + ".old"
+        if os.path.exists(old_path):
+            try:
+                os.remove(old_path)
+            except Exception:
+                pass
+        
+        os.rename(exe_path, old_path)
+        os.rename(new_path, exe_path)
+        
+        logging.info(f"[MANUAL-UPDATE] Updated {exe_name}. Restarting...")
+        
+        # Restart the program
+        subprocess.Popen([exe_path] + sys.argv[1:])
+        sys.exit(0)
+        
+    except Exception as e:
+        # Clean up partial download
+        try:
+            new_path = exe_path + ".new"
+            if os.path.exists(new_path):
+                os.remove(new_path)
+        except Exception:
+            pass
+        return f"Update failed: {e}"
