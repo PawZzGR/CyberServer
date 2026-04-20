@@ -11,7 +11,13 @@ import json
 import time
 import logging
 import subprocess
+import ssl
 from urllib import request, error
+
+# Create an unverified SSL context to bypass missing certificates or MITM filtering
+_ssl_ctx = ssl.create_default_context()
+_ssl_ctx.check_hostname = False
+_ssl_ctx.verify_mode = ssl.CERT_NONE
 
 VERSION = "2.5.0"
 GITHUB_REPO = "PawZzGR/CyberServer"
@@ -88,7 +94,7 @@ def check_for_updates():
             GITHUB_API_URL,
             headers={"User-Agent": "CyberServer-AutoUpdater"}
         )
-        with request.urlopen(req, timeout=UPDATE_CHECK_TIMEOUT) as resp:
+        with request.urlopen(req, timeout=UPDATE_CHECK_TIMEOUT, context=_ssl_ctx) as resp:
             release = json.loads(resp.read().decode())
         
         remote_version = release.get("tag_name", "0.0.0")
@@ -192,7 +198,7 @@ def check_for_updates_manual():
             GITHUB_API_URL,
             headers={"User-Agent": "CyberServer-AutoUpdater"}
         )
-        with request.urlopen(req, timeout=UPDATE_CHECK_TIMEOUT) as resp:
+        with request.urlopen(req, timeout=UPDATE_CHECK_TIMEOUT, context=_ssl_ctx) as resp:
             release = json.loads(resp.read().decode())
         
         remote_version = release.get("tag_name", "0.0.0")
@@ -254,7 +260,7 @@ def download_and_apply_update(download_url, asset_size=0):
             download_url,
             headers={"User-Agent": "CyberServer-AutoUpdater"}
         )
-        with request.urlopen(req, timeout=300) as resp:
+        with request.urlopen(req, timeout=300, context=_ssl_ctx) as resp:
             with open(new_path, 'wb') as f:
                 bytes_downloaded = 0
                 while True:
