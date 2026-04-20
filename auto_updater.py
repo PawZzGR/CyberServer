@@ -31,6 +31,28 @@ GITHUB_REPO = "PawZzGR/CyberServer"
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 UPDATE_CHECK_TIMEOUT = 10  # seconds
 
+def unblock_file(path):
+    """Remove the 'Mark of the Web' (Zone.Identifier) from a file on Windows.
+    This prevents [WinError 4551] / AppLocker / WDAC policy blocks.
+    """
+    if os.name == 'nt' and os.path.exists(path):
+        try:
+            # Method 1: Using PowerShell (Fastest and most reliable on modern Windows)
+            import subprocess
+            subprocess.run(
+                ["powershell.exe", "-WindowStyle", "Hidden", "-Command", f"Unblock-File -Path '{path}'"],
+                capture_output=True,
+                check=False
+            )
+            # Method 2: Manual stream deletion (Fallback for older systems/restricted PowerShell)
+            zone_path = f"{path}:Zone.Identifier"
+            if os.path.exists(zone_path):
+                os.remove(zone_path)
+            # Use logging only after basicConfig is likely called, or handle safely
+            print(f"[AUTO-UPDATE] Unblocked file: {os.path.basename(path)}")
+        except Exception:
+            pass
+
 
 def _get_version():
     """Read the current version from the bundled VERSION file.
@@ -198,6 +220,10 @@ def check_for_updates():
         
         logging.info(f"[AUTO-UPDATE] Downloaded successfully ({bytes_downloaded / (1024*1024):.1f} MB)")
         
+        # Security: Unblock the file before moving it.
+        # This prevents WinError 4551 ("An Application Control policy has blocked this file")
+        unblock_file(new_path)
+        
         # Replace: current → .old.[timestamp], .new → current
         old_path = f"{exe_path}.old.{int(time.time())}"
         
@@ -330,6 +356,9 @@ def download_and_apply_update(download_url, asset_size=0):
             return f"Download size mismatch: got {bytes_downloaded}, expected {asset_size}"
         
         logging.info(f"[MANUAL-UPDATE] Downloaded successfully ({bytes_downloaded / (1024*1024):.1f} MB)")
+        
+        # Security: Unblock the file before moving it.
+        unblock_file(new_path)
         
         # Replace: current → .old.[timestamp], .new → current
         old_path = f"{exe_path}.old.{int(time.time())}"

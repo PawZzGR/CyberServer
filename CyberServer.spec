@@ -6,7 +6,7 @@ a = Analysis(
     ['Server\\main.py'],
     pathex=['.'],
     binaries=binaries,
-    datas=[('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.'), ('auto_updater.py', '.')] + datas,
+    datas=[('Server\\toast.py', '.'), ('Server\\utils.py', '.'), ('Server\\common.py', '.'), ('Server\\api.py', '.'), ('Server\\database.py', '.'), ('Server\\gui.py', '.'), ('background.png', '.'), ('auto_updater.py', '.'), ('VERSION', '.')] + datas,
     hiddenimports=['auto_updater'] + hiddenimports,
     hookspath=[],
     hooksconfig={},
