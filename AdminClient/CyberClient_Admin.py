@@ -482,7 +482,7 @@ class ClientApp:
 
     def on_close_reboot(self):
         # Reboot the PC when the application is closed
-        os.system("shutdown /r /t 0")
+        subprocess.Popen([r"C:\Windows\System32\shutdown.exe", "/r", "/t", "0"], shell=False)
 
     def clear_window(self):
         for w in self.root.winfo_children(): w.destroy()
@@ -716,7 +716,7 @@ class ClientApp:
             # 60 seconds passed, no login - REBOOT!
             if not self.timer_running and self.reboot_countdown_active:
                 logging.info("Reboot countdown expired - rebooting PC")
-                os.system("shutdown /r /t 0")
+                subprocess.Popen([r"C:\Windows\System32\shutdown.exe", "/r", "/t", "0"], shell=False)
         
         threading.Thread(target=countdown, daemon=True).start()
     
@@ -960,18 +960,21 @@ class ClientApp:
             
         tk.Button(win, text="Save Settings", command=lambda: self.save_settings(win), bg=self.BG_BUTTON, fg="white", font=("Segoe UI", 10, "bold")).pack(pady=10)
         
-        # --- Updates Section ---
+        # --- System Actions (Bottom) ---
         ttk.Separator(win, orient="horizontal").pack(fill="x", pady=5)
-        tk.Label(win, text="Updates", font=("Segoe UI", 12, "bold"), fg=self.ACCENT).pack(pady=(5, 2))
-        _ver = auto_updater.VERSION if auto_updater else "?.?.?"
-        tk.Label(win, text=f"Current version: v{_ver}", font=("Segoe UI", 9), fg="#666666").pack(pady=2)
-        tk.Button(win, text="🔄 Check for Updates", command=lambda: self.check_updates_ui(win), bg="#3498DB", fg="white", font=("Segoe UI", 10)).pack(pady=5)
         
-        # Maintenance Unlock Button (Bottom)
-        ttk.Separator(win, orient="horizontal").pack(fill="x", pady=5)
-        mtn_frame = tk.Frame(win)
-        mtn_frame.pack(fill="x", pady=10)
-        tk.Button(mtn_frame, text="🔓 UNLOCK / MAINTENANCE", command=self.start_maintenance_session, bg="#e67e22", fg="white", font=("Segoe UI", 10, "bold")).pack()
+        sys_frame = tk.Frame(win)
+        sys_frame.pack(fill="x", pady=10)
+        
+        # Left side: Maintenance unlock
+        tk.Button(sys_frame, text="🔓 UNLOCK / MAINTENANCE", command=self.start_maintenance_session, bg="#e67e22", fg="white", font=("Segoe UI", 10, "bold")).pack(side="left", padx=20)
+        
+        # Right side: Updates
+        upd_frame = tk.Frame(sys_frame)
+        upd_frame.pack(side="right", padx=20)
+        _ver = auto_updater.VERSION if auto_updater else "?.?.?"
+        tk.Label(upd_frame, text=f"Version: v{_ver}", font=("Segoe UI", 9), fg="#666666").pack(pady=(0,2))
+        tk.Button(upd_frame, text="🔄 Check Updates", command=lambda: self.check_updates_ui(win), bg="#3498DB", fg="white", font=("Segoe UI", 9, "bold")).pack()
 
     def save_settings(self, win):
         global SERVER_HOST, SERVER_PORT, STATION_NAME, SYNC_INTERVAL, SCAN_INTERVAL
