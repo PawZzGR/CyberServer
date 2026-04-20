@@ -5,7 +5,7 @@ a = Analysis(
     ['UserClient\\CyberClient_User.py'],
     pathex=['.'],
     binaries=[],
-    datas=[('auto_updater.py', '.')],
+    datas=[('auto_updater.py', '.'), ('VERSION', '.')],
     hiddenimports=['auto_updater'],
     hookspath=[],
     hooksconfig={},

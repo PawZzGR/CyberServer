@@ -1,11 +1,3 @@
-import sys
-import os
-
-# --- CRITICAL FIX FOR CYBER CAFE ENVIRONMENTS ---
-for env_var in ['TCL_LIBRARY', 'TK_LIBRARY', 'TCL8.6_LIBRARY']:
-    if env_var in os.environ:
-        del os.environ[env_var]
-
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, ttk
 import json

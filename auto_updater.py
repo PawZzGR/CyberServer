@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import time
+import glob
 import logging
 import subprocess
 import ssl
@@ -19,10 +20,43 @@ _ssl_ctx = ssl.create_default_context()
 _ssl_ctx.check_hostname = False
 _ssl_ctx.verify_mode = ssl.CERT_NONE
 
-VERSION = "2.5.0"
 GITHUB_REPO = "PawZzGR/CyberServer"
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 UPDATE_CHECK_TIMEOUT = 10  # seconds
+
+
+def _get_version():
+    """Read the current version from the bundled VERSION file.
+    
+    When running as a compiled EXE, PyInstaller extracts data files to a temp dir.
+    We look for VERSION there first, then fall back to the source directory.
+    """
+    # When frozen (compiled EXE), look in the PyInstaller bundle directory
+    if getattr(sys, 'frozen', False):
+        bundle_dir = sys._MEIPASS
+        version_path = os.path.join(bundle_dir, 'VERSION')
+        if os.path.exists(version_path):
+            try:
+                with open(version_path, 'r') as f:
+                    return f.read().strip()
+            except Exception:
+                pass
+    
+    # When running from source, look relative to this file
+    source_dir = os.path.dirname(os.path.abspath(__file__))
+    version_path = os.path.join(source_dir, 'VERSION')
+    if os.path.exists(version_path):
+        try:
+            with open(version_path, 'r') as f:
+                return f.read().strip()
+        except Exception:
+            pass
+    
+    return "0.0.0"
+
+
+# Read version dynamically — no more hardcoded version!
+VERSION = _get_version()
 
 
 def get_exe_path():
@@ -50,11 +84,12 @@ def parse_version(version_str):
 
 
 def _cleanup_old_files():
-    """Remove leftover .old and .new files from previous updates."""
+    """Remove leftover .old.*, .old, and .new files from previous updates."""
     exe_path = get_exe_path()
     if not exe_path:
         return
     
+    # Clean exact .old and .new
     for suffix in ['.old', '.new']:
         path = exe_path + suffix
         if os.path.exists(path):
@@ -63,6 +98,14 @@ def _cleanup_old_files():
                 logging.info(f"[AUTO-UPDATE] Cleaned up {os.path.basename(path)}")
             except Exception:
                 pass
+    
+    # Clean timestamped .old.XXXXXXX files
+    for old_file in glob.glob(exe_path + ".old.*"):
+        try:
+            os.remove(old_file)
+            logging.info(f"[AUTO-UPDATE] Cleaned up {os.path.basename(old_file)}")
+        except Exception:
+            pass
 
 
 def check_for_updates():
@@ -130,7 +173,7 @@ def check_for_updates():
             download_url,
             headers={"User-Agent": "CyberServer-AutoUpdater"}
         )
-        with request.urlopen(req, timeout=300) as resp:
+        with request.urlopen(req, timeout=300, context=_ssl_ctx) as resp:
             with open(new_path, 'wb') as f:
                 bytes_downloaded = 0
                 while True:
@@ -148,15 +191,8 @@ def check_for_updates():
         
         logging.info(f"[AUTO-UPDATE] Downloaded successfully ({bytes_downloaded / (1024*1024):.1f} MB)")
         
-        # Replace: current → .old, .new → current
-        old_path = exe_path + ".old"
-        
-        # Remove any existing .old file first
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except Exception:
-                pass
+        # Replace: current → .old.[timestamp], .new → current
+        old_path = f"{exe_path}.old.{int(time.time())}"
         
         os.rename(exe_path, old_path)
         os.rename(new_path, exe_path)
@@ -277,13 +313,8 @@ def download_and_apply_update(download_url, asset_size=0):
         
         logging.info(f"[MANUAL-UPDATE] Downloaded successfully ({bytes_downloaded / (1024*1024):.1f} MB)")
         
-        # Replace: current → .old, .new → current
-        old_path = exe_path + ".old"
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except Exception:
-                pass
+        # Replace: current → .old.[timestamp], .new → current
+        old_path = f"{exe_path}.old.{int(time.time())}"
         
         os.rename(exe_path, old_path)
         os.rename(new_path, exe_path)

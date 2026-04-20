@@ -5,7 +5,7 @@ a = Analysis(
     ['AdminClient\\CyberClient_Admin.py'],
     pathex=['.'],
     binaries=[],
-    datas=[('AdminClient\\toast.py', '.'), ('AdminClient\\utils.py', '.'), ('AdminClient\\common.py', '.'), ('background.png', '.'), ('auto_updater.py', '.')],
+    datas=[('AdminClient\\toast.py', '.'), ('AdminClient\\utils.py', '.'), ('AdminClient\\common.py', '.'), ('background.png', '.'), ('auto_updater.py', '.'), ('VERSION', '.')],
     hiddenimports=['auto_updater'],
     hookspath=[],
     hooksconfig={},
