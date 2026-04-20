@@ -1,3 +1,14 @@
+import sys
+import os
+
+# --- CRITICAL FIX FOR CYBER CAFE ENVIRONMENTS ---
+# Many cybercafe management systems (like SmartLaunch/Gizmo) hardcode the TCL_LIBRARY 
+# environment variable system-wide, causing PyInstaller's tkinter to load the wrong init.tcl.
+# We must clear these before importing tkinter to force it to use PyInstaller's bundled _tcl_data!
+for env_var in ['TCL_LIBRARY', 'TK_LIBRARY', 'TCL8.6_LIBRARY']:
+    if env_var in os.environ:
+        del os.environ[env_var]
+
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, ttk
 import json
