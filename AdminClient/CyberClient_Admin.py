@@ -1,3 +1,13 @@
+import os
+import sys
+
+# --- ENVIRONMENT SANITIZATION ---
+# This MUST happen before any third-party imports (like tkinter) to ensure
+# the embedded Python interpreter doesn't try to load system-wide libraries.
+for env_var in ['PYTHONPATH', 'PYTHONHOME', 'PYTHONNOUSERSITE', 'PYTHONUSERBASE']:
+    if env_var in os.environ:
+        del os.environ[env_var]
+
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, ttk
 import json
@@ -540,7 +550,7 @@ class ClientApp:
         
         # Header
         tk.Label(card, text="CyberClient", font=("Segoe UI", 28, "bold"), bg=self.BG_CARD, fg=self.TEXT_PRIMARY).pack(pady=(0, 5))
-        tk.Label(card, text="Administrator Access!", font=("Segoe UI", 12), bg=self.BG_CARD, fg=self.ACCENT).pack(pady=(0, 5))
+        tk.Label(card, text="Administrator Access", font=("Segoe UI", 12), bg=self.BG_CARD, fg=self.ACCENT).pack(pady=(0, 5))
         # Version label
         _ver = auto_updater.VERSION if auto_updater else "?.?.?"
         tk.Label(card, text=f"v{_ver}", font=("Segoe UI", 9), bg=self.BG_CARD, fg="#999999").pack(pady=(0, 20))

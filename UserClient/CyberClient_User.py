@@ -1,3 +1,13 @@
+import os
+import sys
+
+# --- ENVIRONMENT SANITIZATION ---
+# This MUST happen before any third-party imports (like tkinter) to ensure
+# the embedded Python interpreter doesn't try to load system-wide libraries.
+for env_var in ['PYTHONPATH', 'PYTHONHOME', 'PYTHONNOUSERSITE', 'PYTHONUSERBASE']:
+    if env_var in os.environ:
+        del os.environ[env_var]
+
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, ttk
 import json

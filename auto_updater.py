@@ -15,6 +15,13 @@ import subprocess
 import ssl
 from urllib import request, error
 
+# --- ENVIRONMENT SANITIZATION ---
+# Prevent PyInstaller from getting confused by system-wide Python environment variables 
+# or leftovers from parent processes. This fixes "Failed to start embedded interpreter".
+for env_var in ['PYTHONPATH', 'PYTHONHOME', 'PYTHONNOUSERSITE', 'PYTHONUSERBASE']:
+    if env_var in os.environ:
+        del os.environ[env_var]
+
 # Create an unverified SSL context to bypass missing certificates or MITM filtering
 _ssl_ctx = ssl.create_default_context()
 _ssl_ctx.check_hostname = False
@@ -200,7 +207,18 @@ def check_for_updates():
         logging.info(f"[AUTO-UPDATE] Updated {exe_name}: v{VERSION} → {remote_version}. Restarting...")
         
         # Restart the program
-        subprocess.Popen([exe_path] + sys.argv[1:])
+        if os.name == 'nt':
+            # On Windows, use DETACHED_PROCESS and no handle inheritance to ensure
+            # the new process starts with a clean slate and doesn't lock the old EXE.
+            # We add a tiny sleep to let the current process start its shutdown.
+            time.sleep(0.5)
+            subprocess.Popen(
+                [exe_path] + sys.argv[1:],
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+                close_fds=True
+            )
+        else:
+            subprocess.Popen([exe_path] + sys.argv[1:])
         sys.exit(0)
         
     except error.URLError as e:
@@ -322,7 +340,15 @@ def download_and_apply_update(download_url, asset_size=0):
         logging.info(f"[MANUAL-UPDATE] Updated {exe_name}. Restarting...")
         
         # Restart the program
-        subprocess.Popen([exe_path] + sys.argv[1:])
+        if os.name == 'nt':
+            time.sleep(0.5)
+            subprocess.Popen(
+                [exe_path] + sys.argv[1:],
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+                close_fds=True
+            )
+        else:
+            subprocess.Popen([exe_path] + sys.argv[1:])
         sys.exit(0)
         
     except Exception as e:
