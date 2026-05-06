@@ -491,8 +491,91 @@ class ClientApp:
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_reboot)
 
     def on_close_reboot(self):
-        # Reboot the PC when the application is closed
-        subprocess.Popen([r"C:\Windows\System32\shutdown.exe", "/r", "/t", "0"], shell=False)
+        """Bulletproof reboot: Lock screen FIRST, then reboot via Windows API.
+        
+        Strategy:
+        1. Immediately kill the session and restore full-screen lock
+           (so even if reboot fails, user can't play)
+        2. Reboot using direct Windows API (ctypes) - no CMD, no PowerShell,
+           cannot be blocked by removing command-line permissions
+        3. Fallback to shutdown.exe if API fails
+        """
+        # STEP 1: Immediately lock the screen so they can't play
+        try:
+            self.timer_running = False
+            self.restore_lock_screen()
+        except Exception:
+            pass
+        
+        # STEP 2: Reboot in a separate thread so tkinter doesn't freeze
+        def do_reboot():
+            import time
+            time.sleep(0.3)  # Brief delay to let lock screen render
+            
+            # Method 1: Direct Windows API via ctypes (MOST RELIABLE)
+            try:
+                import ctypes
+                from ctypes import wintypes
+                
+                TOKEN_ADJUST_PRIVILEGES = 0x0020
+                TOKEN_QUERY = 0x0008
+                SE_PRIVILEGE_ENABLED = 0x00000002
+                EWX_REBOOT = 0x02
+                EWX_FORCE = 0x04
+                
+                class LUID(ctypes.Structure):
+                    _fields_ = [("LowPart", wintypes.DWORD), ("HighPart", wintypes.LONG)]
+                
+                class LUID_AND_ATTRIBUTES(ctypes.Structure):
+                    _fields_ = [("Luid", LUID), ("Attributes", wintypes.DWORD)]
+                
+                class TOKEN_PRIVILEGES(ctypes.Structure):
+                    _fields_ = [("PrivilegeCount", wintypes.DWORD),
+                                ("Privileges", LUID_AND_ATTRIBUTES * 1)]
+                
+                hToken = ctypes.c_void_p()
+                ctypes.windll.advapi32.OpenProcessToken(
+                    ctypes.windll.kernel32.GetCurrentProcess(),
+                    TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+                    ctypes.byref(hToken)
+                )
+                
+                luid = LUID()
+                ctypes.windll.advapi32.LookupPrivilegeValueW(
+                    None, "SeShutdownPrivilege", ctypes.byref(luid)
+                )
+                
+                tp = TOKEN_PRIVILEGES()
+                tp.PrivilegeCount = 1
+                tp.Privileges[0].Luid = luid
+                tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED
+                
+                ctypes.windll.advapi32.AdjustTokenPrivileges(
+                    hToken, False, ctypes.byref(tp), 0, None, None
+                )
+                
+                result = ctypes.windll.user32.ExitWindowsEx(EWX_REBOOT | EWX_FORCE, 0)
+                if result:
+                    return
+                    
+                logging.warning("[REBOOT] ExitWindowsEx returned False, trying fallback...")
+            except Exception as e:
+                logging.error(f"[REBOOT] Windows API method failed: {e}")
+            
+            # Method 2: Fallback to shutdown.exe
+            try:
+                subprocess.Popen([r"C:\Windows\System32\shutdown.exe", "/r", "/t", "0"], shell=False)
+                return
+            except Exception as e:
+                logging.error(f"[REBOOT] shutdown.exe failed: {e}")
+            
+            # Method 3: Last resort
+            try:
+                os.system("shutdown /r /t 0")
+            except Exception as e:
+                logging.error(f"[REBOOT] All reboot methods failed: {e}")
+        
+        threading.Thread(target=do_reboot, daemon=True).start()
 
     def clear_window(self):
         for w in self.root.winfo_children(): w.destroy()
@@ -726,7 +809,7 @@ class ClientApp:
             # 60 seconds passed, no login - REBOOT!
             if not self.timer_running and self.reboot_countdown_active:
                 logging.info("Reboot countdown expired - rebooting PC")
-                subprocess.Popen([r"C:\Windows\System32\shutdown.exe", "/r", "/t", "0"], shell=False)
+                self.root.after(0, self.on_close_reboot)
         
         threading.Thread(target=countdown, daemon=True).start()
     
@@ -896,6 +979,9 @@ class ClientApp:
         self.ent_port = add_field(cfg_frame, "Server Port:", SERVER_PORT)
         self.ent_interval = add_field(cfg_frame, "Sync Interval (sec):", SYNC_INTERVAL)
         
+        # Maintenance button near config
+        tk.Button(win, text="\U0001f513 UNLOCK / MAINTENANCE", command=self.start_maintenance_session, bg="#e67e22", fg="white", font=("Segoe UI", 10, "bold")).pack(pady=5)
+        
         ttk.Separator(win, orient="horizontal").pack(fill="x", pady=15)
         
         # --- Game Sync Section (P2P) ---
@@ -976,8 +1062,8 @@ class ClientApp:
         sys_frame = tk.Frame(win)
         sys_frame.pack(fill="x", pady=10)
         
-        # Left side: Maintenance unlock
-        tk.Button(sys_frame, text="🔓 UNLOCK / MAINTENANCE", command=self.start_maintenance_session, bg="#e67e22", fg="white", font=("Segoe UI", 10, "bold")).pack(side="left", padx=20)
+        # Left side: Reboot button
+        tk.Button(sys_frame, text="🔄 REBOOT PC", command=self.on_close_reboot, bg="#e74c3c", fg="white", font=("Segoe UI", 10, "bold")).pack(side="left", padx=20)
         
         # Right side: Updates
         upd_frame = tk.Frame(sys_frame)
