@@ -1,9 +1,17 @@
 import threading
-import ctypes
-from ctypes import wintypes
 import os
+import platform
 from utils import load_config, setup_logging
 import logging
+
+# -------- Platform Detection --------
+IS_WINDOWS = platform.system() == "Windows"
+IS_LINUX = platform.system() == "Linux"
+
+# -------- Windows-only imports (conditional) --------
+if IS_WINDOWS:
+    import ctypes
+    from ctypes import wintypes
 
 # ----------------- CONFIG & LOGGING -----------------
 try:
@@ -37,61 +45,75 @@ except Exception as e:
 ACTIVE_SESSIONS = {}
 ACTIVE_LOCK = threading.Lock()
 
-# ----------------- KEYBOARD HOOKS -----------------
-WH_KEYBOARD_LL = 13
-WM_KEYDOWN = 0x0100
-WM_SYSKEYDOWN = 0x0104
-VK_TAB = 0x09
-VK_ESCAPE = 0x1B
-VK_LWIN = 0x5B
-VK_RWIN = 0x5C
-VK_F4 = 0x73
-VK_MENU = 0x12
+# ----------------- KEYBOARD HOOKS (Cross-Platform) -----------------
 
-class KBDLLHOOKSTRUCT(ctypes.Structure):
-    _fields_ = [
-        ("vkCode", wintypes.DWORD),
-        ("scanCode", wintypes.DWORD),
-        ("flags", wintypes.DWORD),
-        ("time", wintypes.DWORD),
-        ("dwExtraInfo", wintypes.ULONG),
-    ]
+if IS_WINDOWS:
+    # -------- Windows: Low-level keyboard hook via ctypes --------
+    WH_KEYBOARD_LL = 13
+    WM_KEYDOWN = 0x0100
+    WM_SYSKEYDOWN = 0x0104
+    VK_TAB = 0x09
+    VK_ESCAPE = 0x1B
+    VK_LWIN = 0x5B
+    VK_RWIN = 0x5C
+    VK_F4 = 0x73
+    VK_MENU = 0x12
 
-LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM)
-keyboard_hook_handle = None
-keyboard_proc = None
+    class KBDLLHOOKSTRUCT(ctypes.Structure):
+        _fields_ = [
+            ("vkCode", wintypes.DWORD),
+            ("scanCode", wintypes.DWORD),
+            ("flags", wintypes.DWORD),
+            ("time", wintypes.DWORD),
+            ("dwExtraInfo", wintypes.ULONG),
+        ]
 
-if os.name == "nt":
+    LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM)
+    keyboard_hook_handle = None
+    keyboard_proc = None
     user32 = ctypes.windll.user32
-else:
-    user32 = None
 
-def low_level_keyboard_proc(nCode, wParam, lParam):
-    if not user32: return 0
-    if nCode < 0:
+    def low_level_keyboard_proc(nCode, wParam, lParam):
+        if nCode < 0:
+            return user32.CallNextHookEx(keyboard_hook_handle, nCode, wParam, lParam)
+        if wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
+            kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+            vk = kb.vkCode
+            alt_pressed = (user32.GetAsyncKeyState(VK_MENU) & 0x8000) != 0
+            if alt_pressed and vk == VK_TAB: return 1
+            if alt_pressed and vk == VK_ESCAPE: return 1
+            if alt_pressed and vk == VK_F4: return 1
+            if vk in (VK_LWIN, VK_RWIN): return 1
         return user32.CallNextHookEx(keyboard_hook_handle, nCode, wParam, lParam)
-    if wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
-        kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
-        vk = kb.vkCode
-        alt_pressed = (user32.GetAsyncKeyState(VK_MENU) & 0x8000) != 0
-        if alt_pressed and vk == VK_TAB: return 1
-        if alt_pressed and vk == VK_ESCAPE: return 1
-        if alt_pressed and vk == VK_F4: return 1
-        if vk in (VK_LWIN, VK_RWIN): return 1
-    return user32.CallNextHookEx(keyboard_hook_handle, nCode, wParam, lParam)
 
-def install_keyboard_hook():
-    global keyboard_hook_handle, keyboard_proc
-    if os.name != "nt" or user32 is None: return
-    if keyboard_hook_handle is not None: return
-    kernel32 = ctypes.windll.kernel32
-    keyboard_proc = LowLevelKeyboardProc(low_level_keyboard_proc)
-    keyboard_hook_handle = user32.SetWindowsHookExW(WH_KEYBOARD_LL, keyboard_proc, kernel32.GetModuleHandleW(None), 0)
+    def install_keyboard_hook():
+        global keyboard_hook_handle, keyboard_proc
+        if keyboard_hook_handle is not None: return
+        kernel32 = ctypes.windll.kernel32
+        keyboard_proc = LowLevelKeyboardProc(low_level_keyboard_proc)
+        keyboard_hook_handle = user32.SetWindowsHookExW(WH_KEYBOARD_LL, keyboard_proc, kernel32.GetModuleHandleW(None), 0)
 
-def uninstall_keyboard_hook():
-    global keyboard_hook_handle, keyboard_proc
-    if os.name != "nt" or user32 is None: return
-    if keyboard_hook_handle:
-        user32.UnhookWindowsHookEx(keyboard_hook_handle)
-        keyboard_hook_handle = None
-        keyboard_proc = None
+    def uninstall_keyboard_hook():
+        global keyboard_hook_handle, keyboard_proc
+        if keyboard_hook_handle:
+            user32.UnhookWindowsHookEx(keyboard_hook_handle)
+            keyboard_hook_handle = None
+            keyboard_proc = None
+
+elif IS_LINUX:
+    # -------- Linux: evdev kernel-level keyboard blocker --------
+    try:
+        # linux_keyboard_blocker.py lives in the project root
+        _parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if _parent_dir not in sys.path:
+            sys.path.insert(0, _parent_dir)
+        from linux_keyboard_blocker import install_keyboard_hook, uninstall_keyboard_hook
+    except ImportError:
+        logging.warning("[KEYBOARD] linux_keyboard_blocker not available, keyboard blocking disabled")
+        def install_keyboard_hook(): pass
+        def uninstall_keyboard_hook(): pass
+
+else:
+    # -------- Unknown OS: no-op --------
+    def install_keyboard_hook(): pass
+    def uninstall_keyboard_hook(): pass

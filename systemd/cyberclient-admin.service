@@ -1,0 +1,16 @@
+[Unit]
+Description=CyberClient Admin Session
+After=network-online.target graphical.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Environment=DISPLAY=:0
+WorkingDirectory=/opt/cyberserver/AdminClient
+ExecStart=/usr/bin/python3 /opt/cyberserver/AdminClient/CyberClient_Admin.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

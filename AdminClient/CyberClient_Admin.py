@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 
 # --- ENVIRONMENT SANITIZATION ---
 # This MUST happen before any third-party imports (like tkinter) to ensure
@@ -16,10 +17,17 @@ import time
 import os
 import sys
 from urllib import request, error
-import ctypes
-from ctypes import wintypes
 import subprocess
 import logging
+
+# -------- Platform Detection --------
+IS_WINDOWS = platform.system() == "Windows"
+IS_LINUX = platform.system() == "Linux"
+
+# -------- Windows-only imports (conditional) --------
+if IS_WINDOWS:
+    import ctypes
+    from ctypes import wintypes
 
 # Add parent directory to sys.path to find auto_updater.py when running from source
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -86,16 +94,24 @@ SCAN_INTERVAL = 60  # Minutes
 SETTINGS_PASSWORD_HASH = None # Default, will be loaded from config
 
 def get_app_data_dir():
-    """Get the persistent AppData directory for settings."""
-    app_data = os.getenv('APPDATA')
-    if not app_data:
-        app_data = os.path.expanduser("~")
+    """Get the persistent config directory for settings (cross-platform).
+    Windows: %APPDATA%/CyberClient/Admin
+    Linux:   ~/.config/CyberClient/Admin
+    """
+    if IS_WINDOWS:
+        app_data = os.getenv('APPDATA')
+        if not app_data:
+            app_data = os.path.expanduser("~")
+    else:
+        # XDG Base Directory Specification for Linux
+        app_data = os.getenv('XDG_CONFIG_HOME',
+                             os.path.join(os.path.expanduser("~"), ".config"))
     
     path = os.path.join(app_data, "CyberClient", "Admin")
     try:
         os.makedirs(path, exist_ok=True)
     except Exception as e:
-        print(f"Failed to create AppData dir: {e}")
+        print(f"Failed to create config dir: {e}")
         return _BASE_DIR # Fallback to local
     return path
 
@@ -180,68 +196,91 @@ REMOVE_FOLDER_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/remove_fo
 UPDATE_INDEX_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/update_index"
 GET_FOLDERS_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api/file_sync/folders"
 
-# -------- WINDOWS KEYBLOCK --------
-user32 = ctypes.windll.user32
-kernel32 = ctypes.windll.kernel32
-WH_KEYBOARD_LL = 13
-WM_KEYDOWN = 0x0100
-WM_SYSKEYDOWN = 0x0104
-VK_TAB = 0x09
-VK_LWIN = 0x5B
-VK_RWIN = 0x5C
-VK_ESCAPE = 0x1B
-VK_CONTROL = 0x11
-VK_MENU = 0x12  # Alt key
-keyboard_block_enabled = True
-keyboard_hook_id = None
+# -------- KEYBOARD BLOCKING (Cross-Platform) --------
 
-class KBDLLHOOKSTRUCT(ctypes.Structure):
-    _fields_ = [("vkCode", wintypes.DWORD), ("scanCode", wintypes.DWORD), ("flags", wintypes.DWORD), ("time", wintypes.DWORD), ("dwExtraInfo", wintypes.ULONG)]
-
-def low_level_keyboard_proc(nCode, wParam, lParam):
-    if nCode == 0 and keyboard_block_enabled and wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
-        kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
-        vk = kb.vkCode
-        ctrl_down = bool(user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
-        alt_down = bool(user32.GetAsyncKeyState(VK_MENU) & 0x8000)
-        
-        # Block Alt+Tab and Alt+Esc (task switcher)
-        if alt_down and vk == VK_TAB: return 1
-        if alt_down and vk == VK_ESCAPE: return 1
-        
-        # Block Windows keys
-        if vk in (VK_LWIN, VK_RWIN): return 1
-        
-        # Block Ctrl+Esc (Start menu)
-        if ctrl_down and vk == VK_ESCAPE: return 1
-        
-    return user32.CallNextHookEx(keyboard_hook_id, nCode, wParam, lParam)
-
-LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, wintypes.INT, wintypes.WPARAM, wintypes.LPARAM)
-
-def install_keyboard_hook():
-    global keyboard_hook_id, keyboard_block_enabled
-    if keyboard_hook_id is not None: return
-    prot = LowLevelKeyboardProc(low_level_keyboard_proc)
-    keyboard_hook_id = user32.SetWindowsHookExW(WH_KEYBOARD_LL, prot, kernel32.GetModuleHandleW(None), 0)
-    # Keep reference to callback to prevent GC
-    install_keyboard_hook.prot = prot 
+if IS_WINDOWS:
+    # -------- Windows: Low-level keyboard hook via ctypes --------
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    WH_KEYBOARD_LL = 13
+    WM_KEYDOWN = 0x0100
+    WM_SYSKEYDOWN = 0x0104
+    VK_TAB = 0x09
+    VK_LWIN = 0x5B
+    VK_RWIN = 0x5C
+    VK_ESCAPE = 0x1B
+    VK_CONTROL = 0x11
+    VK_MENU = 0x12  # Alt key
     keyboard_block_enabled = True
+    keyboard_hook_id = None
 
-def uninstall_keyboard_hook():
-    global keyboard_hook_id, keyboard_block_enabled
-    if keyboard_hook_id:
-        user32.UnhookWindowsHookEx(keyboard_hook_id)
-        keyboard_hook_id = None
-    keyboard_block_enabled = False
+    class KBDLLHOOKSTRUCT(ctypes.Structure):
+        _fields_ = [("vkCode", wintypes.DWORD), ("scanCode", wintypes.DWORD), ("flags", wintypes.DWORD), ("time", wintypes.DWORD), ("dwExtraInfo", wintypes.ULONG)]
 
-def pump_messages():
-    msg = wintypes.MSG()
-    while True:
-        while user32.PeekMessageW(ctypes.byref(msg), 0, 0, 0, 1):
-            user32.TranslateMessage(ctypes.byref(msg))
-            user32.DispatchMessageW(ctypes.byref(msg))
-        time.sleep(0.01)
+    def low_level_keyboard_proc(nCode, wParam, lParam):
+        if nCode == 0 and keyboard_block_enabled and wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
+            kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+            vk = kb.vkCode
+            ctrl_down = bool(user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
+            alt_down = bool(user32.GetAsyncKeyState(VK_MENU) & 0x8000)
+            
+            # Block Alt+Tab and Alt+Esc (task switcher)
+            if alt_down and vk == VK_TAB: return 1
+            if alt_down and vk == VK_ESCAPE: return 1
+            
+            # Block Windows keys
+            if vk in (VK_LWIN, VK_RWIN): return 1
+            
+            # Block Ctrl+Esc (Start menu)
+            if ctrl_down and vk == VK_ESCAPE: return 1
+            
+        return user32.CallNextHookEx(keyboard_hook_id, nCode, wParam, lParam)
+
+    LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, wintypes.INT, wintypes.WPARAM, wintypes.LPARAM)
+
+    def install_keyboard_hook():
+        global keyboard_hook_id, keyboard_block_enabled
+        if keyboard_hook_id is not None: return
+        prot = LowLevelKeyboardProc(low_level_keyboard_proc)
+        keyboard_hook_id = user32.SetWindowsHookExW(WH_KEYBOARD_LL, prot, kernel32.GetModuleHandleW(None), 0)
+        # Keep reference to callback to prevent GC
+        install_keyboard_hook.prot = prot 
+        keyboard_block_enabled = True
+
+    def uninstall_keyboard_hook():
+        global keyboard_hook_id, keyboard_block_enabled
+        if keyboard_hook_id:
+            user32.UnhookWindowsHookEx(keyboard_hook_id)
+            keyboard_hook_id = None
+        keyboard_block_enabled = False
+
+    def pump_messages():
+        msg = wintypes.MSG()
+        while True:
+            while user32.PeekMessageW(ctypes.byref(msg), 0, 0, 0, 1):
+                user32.TranslateMessage(ctypes.byref(msg))
+                user32.DispatchMessageW(ctypes.byref(msg))
+            time.sleep(0.01)
+
+elif IS_LINUX:
+    # -------- Linux: evdev kernel-level keyboard blocker --------
+    try:
+        from linux_keyboard_blocker import install_keyboard_hook, uninstall_keyboard_hook, pump_messages
+    except ImportError:
+        logging.warning("[KEYBOARD] linux_keyboard_blocker not available")
+        def install_keyboard_hook(): pass
+        def uninstall_keyboard_hook(): pass
+        def pump_messages():
+            while True:
+                time.sleep(1)
+
+else:
+    # -------- Unknown OS: no-op --------
+    def install_keyboard_hook(): pass
+    def uninstall_keyboard_hook(): pass
+    def pump_messages():
+        while True:
+            time.sleep(1)
 
 # -------- HTTP FILE SERVER FOR GAME SYNC --------
 
@@ -491,14 +530,13 @@ class ClientApp:
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_reboot)
 
     def on_close_reboot(self):
-        """Bulletproof reboot: Lock screen FIRST, then reboot via Windows API.
+        """Bulletproof reboot: Lock screen FIRST, then reboot.
         
         Strategy:
         1. Immediately kill the session and restore full-screen lock
-           (so even if reboot fails, user can't play)
-        2. Reboot using direct Windows API (ctypes) - no CMD, no PowerShell,
-           cannot be blocked by removing command-line permissions
-        3. Fallback to shutdown.exe if API fails
+        2. Reboot using OS-appropriate method:
+           - Windows: Direct Windows API (ctypes) → shutdown.exe → os.system
+           - Linux: systemctl reboot → shutdown -r now → os.system
         """
         # STEP 1: Immediately lock the screen so they can't play
         try:
@@ -512,6 +550,25 @@ class ClientApp:
             import time
             time.sleep(0.3)  # Brief delay to let lock screen render
             
+            if IS_LINUX:
+                # ---- Linux Reboot ----
+                try:
+                    subprocess.run(["systemctl", "reboot"], check=True)
+                    return
+                except Exception as e:
+                    logging.error(f"[REBOOT] systemctl reboot failed: {e}")
+                try:
+                    subprocess.run(["shutdown", "-r", "now"], check=True)
+                    return
+                except Exception as e:
+                    logging.error(f"[REBOOT] shutdown -r now failed: {e}")
+                try:
+                    os.system("reboot")
+                except Exception as e:
+                    logging.error(f"[REBOOT] All Linux reboot methods failed: {e}")
+                return
+            
+            # ---- Windows Reboot ----
             # Method 1: Direct Windows API via ctypes (MOST RELIABLE)
             try:
                 import ctypes
@@ -1015,7 +1072,7 @@ class ClientApp:
         def add_sync_folder():
             folder = filedialog.askdirectory(parent=win)
             if folder:
-                folder = folder.replace("/", "\\")
+                folder = folder.replace("/", os.sep)
                 if self.add_sync_folder_ui(folder):
                     self.sync_listbox.insert(tk.END, folder)
                     self.sync_status_lbl.config(text=f"Status: Serving {len(self.sync_folders)} folders")
@@ -1318,9 +1375,20 @@ class ClientApp:
 
 def early_lock_enforcer(root):
     """
-    THREAD: Aggressively force window to foreground during startup (first 5 seconds).
+    THREAD: Aggressively force window to foreground during startup.
     """
     try:
+        if IS_LINUX:
+            # On Linux, just enforce tkinter topmost aggressively
+            end_time = time.time() + 20
+            while time.time() < end_time:
+                root.after(0, lambda: root.attributes("-topmost", True))
+                root.after(0, lambda: root.lift())
+                root.after(0, lambda: root.focus_force())
+                time.sleep(0.1)
+            return
+
+        # ---- Windows: Use HWND for aggressive foreground forcing ----
         hwnd = 0
         for _ in range(50):
             try:

@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox, simpledialog, filedialog
 import sqlite3
 import threading
 import os
+import platform
 import shutil
 import time
 import random
@@ -188,6 +189,10 @@ class ServerApp:
         except Exception as e: print("Ticket write error:", e); return
         if os.name == "nt":
             try: os.startfile(path, "print")
+            except Exception as e: print("Ticket print error:", e)
+        elif platform.system() == "Linux":
+            import subprocess
+            try: subprocess.Popen(["lpr", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except Exception as e: print("Ticket print error:", e)
 
     def issue_guest_code(self):
@@ -433,7 +438,7 @@ class ServerApp:
     def add_game_path_ui(self):
         path = filedialog.askdirectory(parent=self.root, title="Επιλογή φακέλου παιχνιδιού")
         if path:
-            path = path.replace("/", "\\") # Windows path fix
+            path = path.replace("/", os.sep) # Cross-platform path fix
             ok, err = db.add_game_path(path)
             if ok: 
                 show_toast(self.root, "Path added", "success")

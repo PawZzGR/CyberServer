@@ -1,0 +1,17 @@
+[Unit]
+Description=CyberClient User Session
+After=network-online.target graphical.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cyberguest
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/cyberguest/.Xauthority
+ExecStart=/usr/bin/python3 /opt/cyberserver/UserClient/CyberClient_User.py
+Restart=always
+RestartSec=2
+KillMode=process
+
+[Install]
+WantedBy=graphical.target
